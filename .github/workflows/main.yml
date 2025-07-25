@@ -35,6 +35,7 @@ jobs:
         with:
           path: "target/${{env.packageName}}"
           key: jarpack
+          save-always: true
   cacheRestore:
     name: Restore Test Cache
     runs-on: windows-latest
