@@ -17,9 +17,9 @@ env:
 
 jobs:
   build:
-    if: false
+    if: steps.cache.outputs.cache-hit != true
     name: Build and JARify Project
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,11 +30,9 @@ jobs:
           java-version: ${{env.javaVersion}}
           cache: 'maven'
       - name: Build
-        if: steps.cache.outputs.cache-hit != true
         run: mvn clean package shade:shade
       - name: Cache JAR
         id: cache
-        if: always() && steps.cache.outputs.cache-hit != true
         uses: actions/cache/save@v4
         with:
           path: target/${{env.packageName}}
@@ -42,8 +40,8 @@ jobs:
           enableCrossOsArchive: true
   cacheRestore:
     name: Restore Test Cache
-    runs-on: windows-latest
-    #needs: [build]
+    runs-on: mac-latest
+    needs: [build]
     steps:
       - name: Restore
         uses: actions/cache/restore@v4
