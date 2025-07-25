@@ -30,7 +30,7 @@ jobs:
           path: target/${{env.packageName}}
           key: jarpack-${{env.version}}
           enableCrossOsArchive: true
-      - run: echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
+      - run: echo "file=$( ls -Art | tail -n 1 )"
   build:
     name: Build and JARify Project
     needs: [check-cache]
