@@ -16,25 +16,38 @@ env:
   javaSource: zulu
 
 jobs:
+  check-cache:
+    name: Check the artifact cache
+    runs-on: ubuntu-latest
+    outputs:
+      cache-hit: false
+    steps: 
+      - name: Get cache
+        id: get-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: target/${{env.packageName}}
+          key: jarpack-${{env.version}}
+          enableCrossOsArchive: true
+      - name: Set the output
+        if: steps.get-cache.outputs.cache-hit == true
+        run: echo true >> $GITHUB_OUTPUT
   build:
     name: Build and JARify Project
+    if: job.check-cache.outputs.cache-hit != true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        if: steps.cache.outputs.cache-hit != true
         uses: actions/checkout@v4
       - name: Installing Java
-        if: steps.cache.outputs.cache-hit != true
         uses: actions/setup-java@v4
         with:
           distribution: ${{env.javaSource}}
           java-version: ${{env.javaVersion}}
           cache: 'maven'
       - name: Build
-        if: steps.cache.outputs.cache-hit != true
         run: mvn clean package shade:shade
       - name: Cache JAR
-        if: steps.cache.outputs.cache-hit != true
         id: cache
         uses: actions/cache/save@v4
         with:
