@@ -31,11 +31,13 @@ jobs:
       - name: Build
         run: mvn clean package shade:shade
       - name: Cache JAR
+        id: cache
+        if: always() && steps.cache.outputs.cache_hit != true
         uses: actions/cache/save@v4
         with:
-          path: "target/${{env.packageName}}"
-          key: jarpack
-          save-always: true
+          path: target/${{env.packageName}}
+          key: jarpack-${{env.version}}
+          enableCrossOsArchive: true
   cacheRestore:
     name: Restore Test Cache
     runs-on: windows-latest
@@ -44,7 +46,7 @@ jobs:
       - name: Restore
         uses: actions/cache/restore@v4
         with:
-          key: jarpack
+          key: jarpack-${{env.version}}
           path: app/main.jar
       - name: Print
         run: cd app && ls
