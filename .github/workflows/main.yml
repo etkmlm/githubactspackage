@@ -29,6 +29,7 @@ jobs:
           java-version: ${{env.javaVersion}}
           cache: 'maven'
       - name: Build
+        if: steps.cache.outputs.cache_hit != true
         run: mvn clean package shade:shade
       - name: Cache JAR
         id: cache
@@ -48,5 +49,6 @@ jobs:
         with:
           key: jarpack-${{env.version}}
           path: app/main.jar
+          enableCrossOsArchive: true
       - name: Print
         run: cd app && ls
