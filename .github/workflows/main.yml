@@ -25,8 +25,8 @@ jobs:
       - name: Installing Java
         uses: actions/setup-java@v4
         with:
-          distribution: '$javaSource'
-          java-version: '$javaVersion'
+          distribution: "$javaSource"
+          java-version: "$javaVersion"
           cache: 'java'
       - name: Build
         run: mvn clean package shade:shade
