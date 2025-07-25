@@ -20,7 +20,7 @@ jobs:
     name: Check the artifact cache
     runs-on: ubuntu-latest
     outputs:
-      cache-hit: false
+      cache-hit: $
     steps: 
       - name: Get Cache
         id: get-cache
