@@ -25,13 +25,13 @@ jobs:
       - name: Installing Java
         uses: actions/setup-java@v4
         with:
-          distribution: "$javaSource"
-          java-version: "$javaVersion"
+          distribution: ${{env.javaSource}}
+          java-version: ${{env.javaVersion}}
           cache: 'java'
       - name: Build
         run: mvn clean package shade:shade
       - name: Cache JAR
         uses: actions/cache/save@v4
         with:
-          path: "target/$packageName"
+          path: "target/${{env.packageName}}"
           key: jarpack
