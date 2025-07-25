@@ -15,7 +15,7 @@ env:
   vendor: etkmlm
   javaVersion: 17
   javaSource: zulu
-  javaPackage: jre+fx
+  javaPackage: jdk+fx
 
 jobs:
   check-cache:
