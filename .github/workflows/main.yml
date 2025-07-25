@@ -17,6 +17,7 @@ env:
 
 jobs:
   build:
+    if: false
     name: Build and JARify Project
     runs-on: windows-latest
     steps:
@@ -42,7 +43,7 @@ jobs:
   cacheRestore:
     name: Restore Test Cache
     runs-on: windows-latest
-    needs: [build]
+    #needs: [build]
     steps:
       - name: Restore
         uses: actions/cache/restore@v4
