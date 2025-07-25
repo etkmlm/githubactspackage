@@ -17,11 +17,13 @@ env:
 
 jobs:
   build:
-    if: build.steps.cache.outputs.cache-hit != true
     name: Build and JARify Project
     runs-on: ubuntu-latest
     steps:
+      - name: Check Cache
+        if: steps.cache.outputs.cache-hit != true
       - name: Checkout
+        continue-on-error: false
         uses: actions/checkout@v4
       - name: Installing Java
         uses: actions/setup-java@v4
@@ -30,8 +32,10 @@ jobs:
           java-version: ${{env.javaVersion}}
           cache: 'maven'
       - name: Build
+        continue-on-error: false
         run: mvn clean package shade:shade
       - name: Cache JAR
+        continue-on-error: false
         id: cache
         uses: actions/cache/save@v4
         with:
