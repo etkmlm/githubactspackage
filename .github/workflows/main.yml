@@ -37,7 +37,7 @@ jobs:
           key: jarpack
   cacheRestore:
     name: Restore Test Cache
-    runs_on: windows-latest
+    runs-on: windows-latest
     needs: [build]
     steps:
       - name: Restore
