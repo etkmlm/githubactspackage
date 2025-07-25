@@ -20,10 +20,8 @@ jobs:
     name: Build and JARify Project
     runs-on: ubuntu-latest
     steps:
-      - name: Check Cache
-        if: steps.cache.outputs.cache-hit != true
       - name: Checkout
-        continue-on-error: false
+        if: steps.cache.outputs.cache-hit != true
         uses: actions/checkout@v4
       - name: Installing Java
         uses: actions/setup-java@v4
