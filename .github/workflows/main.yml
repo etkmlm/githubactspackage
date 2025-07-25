@@ -78,6 +78,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{steps.jprun.outputs.file}}
-          path: ${{env.version}}/linux/${{steps.jprun.outputs.file}}
+          name: ${{env.version}}/linux/${{steps.jprun.outputs.file}}
+          path: ${{steps.jprun.outputs.file}}
   
