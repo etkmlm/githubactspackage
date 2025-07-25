@@ -72,6 +72,7 @@ jobs:
           path: target/${{env.packageName}}
           key: jarpack-${{env.version}}
           enableCrossOsArchive: true
+      - uses: actions/checkout@v4
       - name: Install Java
         uses: actions/setup-java@v4
         with:
