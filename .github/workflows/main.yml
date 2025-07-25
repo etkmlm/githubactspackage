@@ -48,7 +48,8 @@ jobs:
       - name: Restore
         uses: actions/cache/restore@v4
         with:
-          key: jarpack-${{env.version}}
           path: target/${{env.packageName}}
+          key: jarpack-${{env.version}}
+          enableCrossOsArchive: true
       - name: Print
         run: cd target && ls
