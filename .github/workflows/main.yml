@@ -17,7 +17,7 @@ env:
 
 jobs:
   build:
-    if: steps.cache.outputs.cache-hit != true
+    if: jobs.build.steps.cache.outputs.cache-hit != true
     name: Build and JARify Project
     runs-on: ubuntu-latest
     steps:
