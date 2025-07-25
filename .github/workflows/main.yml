@@ -34,7 +34,8 @@ jobs:
         run: echo true >> $GITHUB_OUTPUT
   build:
     name: Build and JARify Project
-    if: jobs.check-cache.outputs.cache-hit != true
+    needs: [check-cache]
+    if: needs.check-cache.outputs.cache-hit != true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
