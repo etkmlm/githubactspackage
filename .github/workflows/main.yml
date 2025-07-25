@@ -35,3 +35,15 @@ jobs:
         with:
           path: "target/${{env.packageName}}"
           key: jarpack
+  cacheRestore:
+    name: Restore Test Cache
+    runs_on: windows-latest
+    needs: [build]
+    steps:
+      - name: Restore
+        uses: actions/cache/restore@v4
+        with:
+          key: jarpack
+          path: app/main.jar
+      - name: Print
+        run: cd app && ls
