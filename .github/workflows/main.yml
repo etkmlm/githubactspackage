@@ -20,7 +20,7 @@ jobs:
     name: Check the artifact cache
     runs-on: ubuntu-latest
     outputs:
-      cache-hit: ${{steps.out.outputs.cache-hit}}
+      cache-hit: ${{steps.get-cache.outputs.cache-hit}}
     steps: 
       - name: Get Cache
         id: get-cache
@@ -29,13 +29,10 @@ jobs:
           path: target/${{env.packageName}}
           key: jarpack-${{env.version}}
           enableCrossOsArchive: true
-      - name: Set the output
-        id: out
-        run: echo "cache-hit=${{steps.get-cache.outputs.cache-hit}}" >> $GITHUB_OUTPUT
   build:
     name: Build and JARify Project
     needs: [check-cache]
-    if: needs.check-cache.outputs.cache-hit != true
+    if: needs.check-cache.outputs.cache-hit != true || needs.check-cache.outputs.cache-hit != "true"
     runs-on: ubuntu-latest
     steps:
       - run: echo "${{needs.check-cache.outputs.cache-hit}}"
