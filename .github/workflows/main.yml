@@ -22,7 +22,7 @@ jobs:
     outputs:
       cache-hit: false
     steps: 
-      - name: Get cache
+      - name: Get Cache
         id: get-cache
         uses: actions/cache/restore@v4
         with:
@@ -30,8 +30,7 @@ jobs:
           key: jarpack-${{env.version}}
           enableCrossOsArchive: true
       - name: Set the output
-        if: steps.get-cache.outputs.cache-hit == true
-        run: echo true >> $GITHUB_OUTPUT
+        run: echo ${{steps.get-cache.outputs.cache-hit}} >> $GITHUB_OUTPUT
   build:
     name: Build and JARify Project
     needs: [check-cache]
