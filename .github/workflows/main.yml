@@ -24,16 +24,17 @@ jobs:
         if: steps.cache.outputs.cache-hit != true
         uses: actions/checkout@v4
       - name: Installing Java
+        if: steps.cache.outputs.cache-hit != true
         uses: actions/setup-java@v4
         with:
           distribution: ${{env.javaSource}}
           java-version: ${{env.javaVersion}}
           cache: 'maven'
       - name: Build
-        continue-on-error: false
+        if: steps.cache.outputs.cache-hit != true
         run: mvn clean package shade:shade
       - name: Cache JAR
-        continue-on-error: false
+        if: steps.cache.outputs.cache-hit != true
         id: cache
         uses: actions/cache/save@v4
         with:
