@@ -18,7 +18,7 @@ env:
 jobs:
   build:
     name: Build and JARify Project
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,11 +29,11 @@ jobs:
           java-version: ${{env.javaVersion}}
           cache: 'maven'
       - name: Build
-        if: steps.cache.outputs.cache_hit != true
+        if: steps.cache.outputs.cache-hit != true
         run: mvn clean package shade:shade
       - name: Cache JAR
         id: cache
-        if: always() && steps.cache.outputs.cache_hit != true
+        if: always() && steps.cache.outputs.cache-hit != true
         uses: actions/cache/save@v4
         with:
           path: target/${{env.packageName}}
