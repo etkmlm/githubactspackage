@@ -21,4 +21,4 @@ jobs:
       - name: Build
         run: mvn clean package
       - name: Echo
-        run: echo "$PWD"
+        run: cd target && echo "$PWD"
