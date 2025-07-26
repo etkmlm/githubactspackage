@@ -161,8 +161,8 @@ jobs:
         with:
           path: java/*
           key: win-java-${{env.javaVersion}}
-      - run: cd "$JDK_HOME" && ls
-        shell: bash
+      - run: cd "java" && ls
+      - run: pwd
   pack-dmg-macos-old:
     needs: [build]
     if: false
