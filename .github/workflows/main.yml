@@ -157,7 +157,7 @@ jobs:
       - name: Java Extract
         if: steps.get-java-cache.outputs.cache-hit != 'true' && steps.java-down.outputs.result == 'true'
         shell: bash
-        run: mkdir "$JDK_HOME" && mkdir "$JRE_HOME" && unzip "${{steps.java-down.outputs.jdkFile}}" -d "$JDK_HOME" && jdff=$(ls "$JDK_HOME" | head -1) && mv "${jdff}/*" "$JDK_HOME" && rm "${{steps.java-down.outputs.jdkFile}}" "$JDK_HOME/${jdff}" && unzip "${{steps.java-down.outputs.jreFile}}" -d "$JRE_HOME" && jdff=$(ls "$JRE_HOME" | head -1) && mv "${jrff}/*" "$JRE_HOME" && rm "${{steps.java-down.outputs.jreFile}}" "$JRE_HOME/${jrff}"
+        run: mkdir "$JDK_HOME" && mkdir "$JRE_HOME" && unzip "${{steps.java-down.outputs.jdkFile}}" -d "$JDK_HOME" && jdff=$(ls "$JDK_HOME" | head -1) && mv "$JDK_HOME/${jdff}/*" "$JDK_HOME" && rm "${{steps.java-down.outputs.jdkFile}}" "$JDK_HOME/${jdff}" && unzip "${{steps.java-down.outputs.jreFile}}" -d "$JRE_HOME" && jdff=$(ls "$JRE_HOME" | head -1) && mv "$JRE_HOME/${jrff}/*" "$JRE_HOME" && rm "${{steps.java-down.outputs.jreFile}}" "$JRE_HOME/${jrff}"
       - name: Save Java Cache
         if: steps.get-java-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
