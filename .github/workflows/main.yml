@@ -94,6 +94,7 @@ jobs:
     name: Pack JAR For Windows
     runs-on: windows-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Get Cache
         id: get-cache
         uses: actions/cache/restore@v4
@@ -101,7 +102,6 @@ jobs:
           path: target/${{env.packageName}}
           key: jarpack-${{env.version}}
           enableCrossOsArchive: true
-      - uses: actions/checkout@v4
       - name: Install Java
         uses: actions/setup-java@v4
         with:
