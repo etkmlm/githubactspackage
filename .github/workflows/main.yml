@@ -160,7 +160,7 @@ jobs:
         with:
           path: java/*
           key: win-java
-      - run: cd "$JDK_HOME" && ls
+      - run: printenv
   pack-dmg-macos-old:
     needs: [build]
     if: false
