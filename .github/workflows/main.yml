@@ -223,6 +223,7 @@ jobs:
     needs: [build]
     name: Pack JAR For MacOS Apple Silicon
     runs-on: macos-latest
+    permissions: write-all
     steps:
       - name: Get Cache
         id: get-cache
