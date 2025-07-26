@@ -92,8 +92,8 @@ jobs:
     name: Pack JAR For Windows
     runs-on: windows-latest
     env:
-      JDK_HOME: "java/jdk${{env.javaVersion}}"
-      JRE_HOME: "java/jre${{env.javaVersion}}"
+      JDK_HOME: java/jdk${{env.javaVersion}}
+      JRE_HOME: java/jre${{env.javaVersion}}
     steps:
       - name: Get JAR Cache
         id: get-cache
