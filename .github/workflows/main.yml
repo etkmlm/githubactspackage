@@ -268,7 +268,7 @@ jobs:
         id: get-jar
         run: echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
       - name: Rename File
-        run: file=${{steps.get-jar.outputs.file}} && mv "$file" "${file%.*}arm.dmg"
+        run: file="${{steps.get-jar.outputs.file}}" && mv "$file" "${file%.*}arm.dmg"
       - name: Upload Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
