@@ -94,6 +94,9 @@ jobs:
     env:
       JDK_HOME: java/jdk
       JRE_HOME: java/jre
+      ZULU_OS: windows
+      ZULU_ARCH: x64
+      ZULU_TYPE: zip
     steps:
       - name: Get JAR Cache
         id: get-cache
@@ -114,8 +117,8 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const jdkUrl = "https://api.azul.com/metadata/v1/zulu/packages/?java_version=${{env.javaVersion}}&os=linux&arch=x64&java_package_type=jdk&javafx_bundled=true&release_status=ga&availability_types=CA&archive_type=tar.gz&certifications=tck&latest=true";
-            const jreUrl = "https://api.azul.com/metadata/v1/zulu/packages/?java_version=${{env.javaVersion}}&os=linux&arch=x64&java_package_type=jre&javafx_bundled=true&release_status=ga&availability_types=CA&archive_type=tar.gz&certifications=tck&latest=true";
+            const jdkUrl = "https://api.azul.com/metadata/v1/zulu/packages/?java_version=${{env.javaVersion}}&os=${{env.ZULU_OS}}&arch=${{env.ZULU_ARCH}}&java_package_type=jdk&javafx_bundled=true&release_status=ga&availability_types=CA&archive_type=${{env.ZULU_TYPE}}&certifications=tck&latest=true";
+            const jreUrl = "https://api.azul.com/metadata/v1/zulu/packages/?java_version=${{env.javaVersion}}&os=${{env.ZULU_OS}}&arch=${{env.ZULU_ARCH}}&java_package_type=jre&javafx_bundled=true&release_status=ga&availability_types=CA&archive_type=${{env.ZULU_TYPE}}&certifications=tck&latest=true";
             const jdkResult = await fetch(jdkUrl).then(x => x.json());
             const jreResult = await fetch(jreUrl).then(x => x.json());
 
@@ -123,8 +126,8 @@ jobs:
             const stream = require('stream');
             await exec.exec('mkdir java');
 
-            const jdkFileName = "java/jdk.tar.gz";
-            const jreFileName = "java/jre.tar.gz";
+            const jdkFileName = "java/jdk.${{env.ZULU_TYPE}}";
+            const jreFileName = "java/jre.${{env.ZULU_TYPE}}";
             
             const fetchJdk = await fetch(jdkResult[0].download_url);
             if (fetchJdk.ok && fetchJdk.body){
@@ -154,7 +157,7 @@ jobs:
       - name: Java Extract
         if: steps.get-java-cache.outputs.cache-hit != 'true' && steps.java-down.outputs.result == 'true'
         shell: bash
-        run: mkdir "$JDK_HOME" && mkdir "$JRE_HOME" && tar -xzvf "${{steps.java-down.outputs.jdkFile}}" -C "$JDK_HOME" --strip-components 1 && rm "${{steps.java-down.outputs.jdkFile}}" && tar -xzvf "${{steps.java-down.outputs.jreFile}}" -C "$JRE_HOME" --strip-components 1 && rm "${{steps.java-down.outputs.jreFile}}"
+        run: mkdir "$JDK_HOME" && mkdir "$JRE_HOME" && tar -xvf "${{steps.java-down.outputs.jdkFile}}" -C "$JDK_HOME" --strip-components 1 && rm "${{steps.java-down.outputs.jdkFile}}" && tar -xvf "${{steps.java-down.outputs.jreFile}}" -C "$JRE_HOME" --strip-components 1 && rm "${{steps.java-down.outputs.jreFile}}"
       - name: Save Java Cache
         if: steps.get-java-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
