@@ -17,30 +17,22 @@ env:
   javaSource: zulu
 
 jobs:
-  check-cache:
-    name: Check JAR Cache
+  build:
+    name: Process Project JAR File
     runs-on: ubuntu-latest
-    outputs:
-      cache-hit: ${{steps.get-cache.outputs.cache-hit}}
-    steps: 
+    permissions: write-all
+    steps:
       - id: get-cache
         uses: actions/cache/restore@v4
         with:
           path: target/${{env.packageName}}
           key: jarpack-${{env.version}}
           enableCrossOsArchive: true
-      - run: echo "${{github.ref_name}}"
-  build:
-    name: Build and Create JAR File
-    needs: [check-cache]
-    runs-on: ubuntu-latest
-    permissions: write-all
-    steps:
       - name: Checkout
-        if: needs.check-cache.outputs.cache-hit != 'true'
+        if: steps.get-cache.outputs.cache-hit != 'true'
         uses: actions/checkout@v4
       - name: Install Java
-        if: needs.check-cache.outputs.cache-hit != 'true'
+        if: steps.get-cache.outputs.cache-hit != 'true'
         uses: actions/setup-java@v4
         with:
           distribution: ${{env.javaSource}}
@@ -48,11 +40,11 @@ jobs:
           java-package: jdk+fx
           cache: 'maven'
       - name: Build
-        if: needs.check-cache.outputs.cache-hit != 'true'
+        if: steps.get-cache.outputs.cache-hit != 'true'
         run: mvn clean package shade:shade
       - name: Cache JAR
         id: cache
-        if: always() && needs.check-cache.outputs.cache-hit != 'true'
+        if: always() && steps.get-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: target/${{env.packageName}}
