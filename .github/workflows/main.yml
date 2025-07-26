@@ -100,25 +100,25 @@ jobs:
           path: target/${{env.packageName}}
           key: jarpack-${{env.version}}
           enableCrossOsArchive: true
-      - name: Install Java Runtime
-        uses: actions/setup-java@v4
-        with:
-          distribution: ${{env.javaSource}}
-          java-version: ${{env.javaVersion}}
-          java-package: jre+fx
       - name: Install Java JDK
         uses: actions/setup-java@v4
         with:
           distribution: ${{env.javaSource}}
           java-version: ${{env.javaVersion}}
           java-package: jdk+fx
+      - name: Install Java Runtime
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{env.javaSource}}
+          java-version: ${{env.javaVersion}}
+          java-package: jre+fx
       - run: printenv
       - name: Copy Files
         run: mkdir app && copy "target/${{env.packageName}}" app/main.jar
       - name: Run jpackage
         id: jprun
         shell: bash
-        run: jpackage --name "${{env.appName}}" --type exe --input "${{env.appDir}}" --runtime-image "$JAVA_HOME_17_X64" --main-jar main.jar --app-version "${{env.version}}" --vendor "${{env.vendor}}" --java-options "'-Duser.dir=\$APPDIR'" --win-dir-chooser --win-menu --win-menu-group "${{env.appName}}" && echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
+        run: $JAVA_HOME_17_X64/bin/jpackage.exe --name "${{env.appName}}" --type exe --input "${{env.appDir}}" --runtime-image "$JAVA_HOME" --main-jar main.jar --app-version "${{env.version}}" --vendor "${{env.vendor}}" --java-options "'-Duser.dir=\$APPDIR'" --win-dir-chooser --win-menu --win-menu-group "${{env.appName}}" && echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
