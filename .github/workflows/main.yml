@@ -91,6 +91,9 @@ jobs:
     needs: [build]
     name: Pack JAR For Windows
     runs-on: windows-latest
+    env:
+      JDK_HOME: "java/jdk${{env.javaVersion}}"
+      JRE_HOME: "java/jre${{env.javaVersion}}"
     steps:
       - name: Get JAR Cache
         id: get-cache
@@ -132,7 +135,7 @@ jobs:
             }
             else{
               core.setFailed('JDK could not be downloaded.');
-              return;
+              return false;
             }
 
             const fetchJre = await fetch(jreResult[0].download_url);
@@ -141,20 +144,24 @@ jobs:
               stream.Readable.fromWeb(fetchJre.body).pipe(writer);
               core.setOutput('jreFile', jreFileName);
               console.log("JRE downloaded.");
+              
             }
             else{
               core.setFailed('JRE could not be downloaded.');
+              return false;              
             }
+            return true;
       - name: Java Extract
-        if: steps.get-java-cache.outputs.cache-hit != true
+        if: steps.get-java-cache.outputs.cache-hit != true && steps.java-down.outputs.result == true
         shell: bash
-        run: tar -xzvf "${{steps.java-down.outputs.jdkFile}}" -C java && rm "${{steps.java-down.outputs.jdkFile}}" && tar -xzvf "${{steps.java-down.outputs.jreFile}}" -C java && rm "${{steps.java-down.outputs.jreFile}}" && cd java && ls
+        run: tar -xzvf "${{steps.java-down.outputs.jdkFile}}" -C "$JDK_HOME" --stripComponents 1 && rm "${{steps.java-down.outputs.jdkFile}}" && tar -xzvf "${{steps.java-down.outputs.jreFile}}" -C "$JRE_HOME" --stripComponents 1 && rm "${{steps.java-down.outputs.jreFile}}"
       - name: Save Java Cache
         if: steps.get-java-cache.outputs.cache-hit != true
         uses: actions/cache/save@v4
         with:
           path: java/*
           key: win-java
+      - run: cd "$JDK_HOME" && ls
   pack-dmg-macos-old:
     needs: [build]
     if: false
