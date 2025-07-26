@@ -169,6 +169,7 @@ jobs:
           key: win-java-${{env.javaVersion}}
       - name: Copy Files
         run: mkdir app && copy "target/${{env.packageName}}" app/main.jar
+      - run: pwd && ls
       - name: Run jpackage
         run: | 
           '${{env.JDK_HOME}}/bin/jpackage.exe 
