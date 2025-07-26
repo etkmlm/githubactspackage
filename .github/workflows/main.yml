@@ -163,17 +163,17 @@ jobs:
           key: win-java-${{env.javaVersion}}
       - name: Copy Files
         run: mkdir app && copy "target/${{env.packageName}}" app/main.jar
-      - shell: bash
-        run: cd "java/bin/jdk" && ls
       - name: Run jpackage
-        id: jprun
+        run: $JDK_HOME/bin/jpackage.exe --name "${{env.appName}}" --type exe --input "${{env.appDir}}" --runtime-image "$JRE_HOME" --main-jar main.jar --app-version "${{env.version}}" --vendor "${{env.vendor}}" --java-options "'-Duser.dir=\$APPDIR'" --win-dir-chooser --win-menu --win-menu-group "${{env.appName}}"
+      - name: Get JAR Name
+        id: get-jar
         shell: bash
-        run: $JDK_HOME/bin/jpackage.exe --name "${{env.appName}}" --type exe --input "${{env.appDir}}" --runtime-image "$JRE_HOME" --main-jar main.jar --app-version "${{env.version}}" --vendor "${{env.vendor}}" --java-options "'-Duser.dir=\$APPDIR'" --win-dir-chooser --win-menu --win-menu-group "${{env.appName}}" && echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
+        run: echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-package-${{env.version}}
-          path: ${{steps.jprun.outputs.file}}
+          path: ${{steps.get-jar.outputs.file}}
   pack-dmg-macos-old:
     needs: [build]
     if: false
