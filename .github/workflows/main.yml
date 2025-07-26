@@ -93,7 +93,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Push Environment Variables
-        run: echo "JDK_HOME=java/jdk${{env.javaVersion}}" >> $GITHUB_ENV && echo "JRE_HOME=java/jre${{env.javaVersion}}" >> $GITHUB_ENV
+        run: export "JDK_HOME=java/jdk${{env.javaVersion}}" && export "JRE_HOME=java/jre${{env.javaVersion}}"
       - name: Get JAR Cache
         id: get-cache
         uses: actions/cache/restore@v4
