@@ -159,8 +159,8 @@ jobs:
         shell: bash
         run: | 
           mkdir "$JDK_HOME" && mkdir "$JRE_HOME" && 
-          unzip "${{steps.java-down.outputs.jdkFile}}" -d "$JDK_HOME" && jdff=$(ls "$JDK_HOME" | head -1) && mv "$JDK_HOME/${jdff}/*" "$JDK_HOME/" && rm -r "${{steps.java-down.outputs.jdkFile}}" "$JDK_HOME/${jdff}" && 
-          unzip "${{steps.java-down.outputs.jreFile}}" -d "$JRE_HOME" && jrff=$(ls "$JRE_HOME" | head -1) && mv "$JRE_HOME/${jrff}/*" "$JRE_HOME/" && rm -r "${{steps.java-down.outputs.jreFile}}" "$JRE_HOME/${jrff}"
+          unzip "${{steps.java-down.outputs.jdkFile}}" -d "$JDK_HOME" && jdff=$(ls "$JDK_HOME" | head -1) && mv "$JDK_HOME/${jdff}"/* "$JDK_HOME/" && rm -r "${{steps.java-down.outputs.jdkFile}}" "$JDK_HOME/${jdff}" && 
+          unzip "${{steps.java-down.outputs.jreFile}}" -d "$JRE_HOME" && jrff=$(ls "$JRE_HOME" | head -1) && mv "$JRE_HOME/${jrff}"/* "$JRE_HOME/" && rm -r "${{steps.java-down.outputs.jreFile}}" "$JRE_HOME/${jrff}"
       - run: cd "java\\jdk" && ls
       - name: Save Java Cache
         if: steps.get-java-cache.outputs.cache-hit != 'true'
