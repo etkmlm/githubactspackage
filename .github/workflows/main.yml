@@ -164,7 +164,7 @@ jobs:
       - name: Copy Files
         run: mkdir app && copy "target/${{env.packageName}}" app/main.jar
       - shell: bash
-        run: ls
+        run: cd "java/bin/jdk" && ls
       - name: Run jpackage
         id: jprun
         shell: bash
