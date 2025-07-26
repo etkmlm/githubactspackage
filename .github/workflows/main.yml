@@ -109,7 +109,7 @@ jobs:
           key: win-java
       - name: Java Download
         id: java-down
-        if: steps.get-java-cache.outputs.cache-hit != true
+        if: steps.get-java-cache.outputs.cache-hit != 'true'
         uses: actions/github-script@v7
         with:
           script: |
@@ -151,11 +151,11 @@ jobs:
             }
             return true;
       - name: Java Extract
-        if: steps.get-java-cache.outputs.cache-hit != true && steps.java-down.outputs.result == true
+        if: steps.get-java-cache.outputs.cache-hit != 'true' && steps.java-down.outputs.result == true
         shell: bash
         run: tar -xzvf "${{steps.java-down.outputs.jdkFile}}" -C "$JDK_HOME" --stripComponents 1 && rm "${{steps.java-down.outputs.jdkFile}}" && tar -xzvf "${{steps.java-down.outputs.jreFile}}" -C "$JRE_HOME" --stripComponents 1 && rm "${{steps.java-down.outputs.jreFile}}"
       - name: Save Java Cache
-        if: steps.get-java-cache.outputs.cache-hit != true
+        if: steps.get-java-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: java/*
