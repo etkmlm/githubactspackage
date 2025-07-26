@@ -105,7 +105,8 @@ jobs:
         with:
           path: java/*
           key: win-java
-      - name: Java Procession
+      - name: Java Download
+        id: java-down
         if: steps.get-java-cache.outputs.cache-hit != true
         uses: actions/github-script@v7
         with:
@@ -126,7 +127,7 @@ jobs:
             if (fetchJdk.ok && fetchJdk.body){
               let writer = fs.createWriteStream(jdkFileName);
               stream.Readable.fromWeb(fetchJdk.body).pipe(writer);
-              await exec.exec(`tar -xvzf ${jdkFileName} -C java && rm ${jdkFileName}`);
+              core.setOutput('jdkFile', jdkFileName);
               console.log("JDK downloaded.");
             }
             else{
@@ -136,14 +137,18 @@ jobs:
 
             const fetchJre = await fetch(jreResult[0].download_url);
             if (fetchJre.ok && fetchJre.body){
-              let writer = fs.createWriteStream('java/jre.tar.gz');
+              let writer = fs.createWriteStream(jreFileName);
               stream.Readable.fromWeb(fetchJre.body).pipe(writer);
+              core.setOutput('jreFile', jreFileName);
               console.log("JRE downloaded.");
             }
             else{
               core.setFailed('JRE could not be downloaded.');
             }
-      - run: cd java && ls
+      - name: Java Extract
+        if: steps.get-java-cache.outputs.cache-hit != true
+        shell: bash
+        run: tar -xzvf "${{steps.java-down.outputs.jdkFile}}" -C java && rm "${{steps.java-down.outputs.jdkFile}}" && tar -xzvf "${{steps.java-down.outputs.jreFile}}" -C java && rm "${{steps.java-down.outputs.jreFile}}" && cd java && ls
       - name: Save Java Cache
         if: steps.get-java-cache.outputs.cache-hit != true
         uses: actions/cache/save@v4
