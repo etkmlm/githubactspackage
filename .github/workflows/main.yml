@@ -59,6 +59,7 @@ jobs:
           enableCrossOsArchive: true
   pack-deb-linux:
     needs: [build]
+    if: false
     name: Pack JAR For Linux
     runs-on: ubuntu-latest
     steps:
@@ -89,6 +90,7 @@ jobs:
           path: ${{steps.jprun.outputs.file}}
   pack-exe-windows:
     needs: [build]
+    if: false
     name: Pack JAR For Windows
     runs-on: windows-latest
     steps:
@@ -139,7 +141,7 @@ jobs:
       - name: Run jpackage
         id: jprun
         shell: bash
-        run: jpackage --name "${{env.appName}}" --type dmg --input "${{env.appDir}}" --main-jar main.jar --app-version "${{env.version}}" --vendor "${{env.vendor}}" --java-options "'-Duser.dir=\$APPDIR'" --mac-package-name ${{env.appName}} && echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
+        run: jpackage --name "${{env.appName}}" --type dmg --input "${{env.appDir}}" --main-jar main.jar --app-version "${{env.version}}" --vendor "${{env.vendor}}" --java-options "'-Duser.dir=\$APPDIR'" --mac-package-name "${{env.appName}}" && echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
