@@ -221,7 +221,6 @@ jobs:
           path: ${{steps.get-jar.outputs.file}}
   pack-dmg-macos:
     needs: [build]
-    if: false
     name: Pack JAR For MacOS Apple Silicon
     runs-on: macos-latest
     steps:
@@ -265,9 +264,9 @@ jobs:
       - name: Get JAR Name
         id: get-jar
         run: echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
         with:
-          name: macos-package-${{env.version}}
-          path: ${{steps.get-jar.outputs.file}}
+          files: "${{steps.get-jar.outputs.file}}"
   
