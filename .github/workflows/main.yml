@@ -91,6 +91,9 @@ jobs:
     needs: [build]
     name: Pack JAR For Windows
     runs-on: windows-latest
+    env:
+      JDK_HOME: j
+      JRE_HOME: j
     steps:
       - name: Push Environment Variables
         shell: bash
