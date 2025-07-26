@@ -119,7 +119,7 @@ jobs:
   pack-exe-macos-old:
     needs: [build]
     name: Pack JAR For MacOS Non Apple Silicon
-    runs-on: macos-latest-large
+    runs-on: macos-13
     steps:
       - name: Get Cache
         id: get-cache
