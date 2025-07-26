@@ -112,17 +112,8 @@ jobs:
           distribution: ${{env.javaSource}}
           java-version: ${{env.javaVersion}}
           java-package: jre+fx
-      - name: Copy Files
-        run: mkdir app && copy "target/${{env.packageName}}" app/main.jar
-      - name: Run jpackage
-        id: jprun
-        shell: bash
-        run: jpackage --name "${{env.appName}}" --type exe --input "${{env.appDir}}" --runtime-image "$JAVA_HOME" --main-jar main.jar --app-version "${{env.version}}" --vendor "${{env.vendor}}" --java-options "'-Duser.dir=\$APPDIR'" --win-dir-chooser --win-menu --win-menu-group "${{env.appName}}" && echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-package-${{env.version}}
-          path: ${{steps.jprun.outputs.file}}
+      - run: printenv
+      
   pack-dmg-macos-old:
     needs: [build]
     if: false
