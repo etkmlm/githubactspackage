@@ -101,12 +101,14 @@ jobs:
           path: target/${{env.packageName}}
           key: jarpack-${{env.version}}
           enableCrossOsArchive: true
+      - uses: actions/checkout@v4
       - name: Install Java
         uses: actions/setup-java@v4
         with:
           distribution: ${{env.javaSource}}
           java-version: ${{env.javaVersion}}
           java-package: ${{env.javaPackage}}
+          cache: 'maven'
       - name: Copy Files
         run: mkdir app && copy "target/${{env.packageName}}" app/main.jar
       - name: Run jpackage
