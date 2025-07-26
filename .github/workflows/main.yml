@@ -2,7 +2,7 @@ name: Build and Package
 
 on:
   push:
-
+    tags: [ v* ]
 # Only trigger when a commit is pushed with tag starts with v.
 
 env:
@@ -29,6 +29,7 @@ jobs:
           path: target/${{env.packageName}}
           key: jarpack-${{env.version}}
           enableCrossOsArchive: true
+      - run: echo "${{github.ref_name}}"
   build:
     name: Build and Create JAR File
     needs: [check-cache]
@@ -220,6 +221,7 @@ jobs:
           path: ${{steps.get-jar.outputs.file}}
   pack-dmg-macos:
     needs: [build]
+    if: false
     name: Pack JAR For MacOS Apple Silicon
     runs-on: macos-latest
     steps:
