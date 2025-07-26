@@ -121,13 +121,29 @@ jobs:
             const fetchJdk = await fetch(jdkResult[0].download_url);
             if (fetchJdk.ok && fetchJdk.body){
               let writer = fs.createWriteStream('java/jdk.tar.gz');
-              stream.Readable.fromWeb(resp.body).pipe(writer);
+              stream.Readable.fromWeb(fetchJdk.body).pipe(writer);
               console.log("JDK downloaded.");
             }
             else{
               core.setFailed('JDK could not be downloaded.');
+              return;
             }
-      
+
+            const fetchJre = await fetch(jreResult[0].download_url);
+            if (fetchJre.ok && fetchJre.body){
+              let writer = fs.createWriteStream('java/jre.tar.gz');
+              stream.Readable.fromWeb(fetchJre.body).pipe(writer);
+              console.log("JRE downloaded.");
+            }
+            else{
+              core.setFailed('JRE could not be downloaded.');
+            }
+      - name: Save Java Cache
+        if: steps.get-java-cache.outputs.cache-hit != true
+        uses: actions/cache/save@v4
+        with:
+          path: java/*
+          key: win-java
   pack-dmg-macos-old:
     needs: [build]
     if: false
