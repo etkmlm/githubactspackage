@@ -77,7 +77,6 @@ jobs:
           distribution: ${{env.javaSource}}
           java-version: ${{env.javaVersion}}
           java-package: ${{env.javaPackage}}
-          cache: 'maven'
       - name: Prepare Files
         run: mkdir app && cp "target/${{env.packageName}}" app/main.jar
       - name: Run jpackage
