@@ -60,7 +60,6 @@ jobs:
   pack-deb-linux:
     needs: [build]
     name: Pack JAR For Linux
-    if: false
     runs-on: ubuntu-latest
     steps:
       - name: Install jpackage Dependencies
