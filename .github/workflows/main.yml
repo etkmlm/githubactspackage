@@ -163,6 +163,8 @@ jobs:
           key: win-java-${{env.javaVersion}}
       - name: Copy Files
         run: mkdir app && copy "target/${{env.packageName}}" app/main.jar
+      - shell: bash
+        run: ls
       - name: Run jpackage
         id: jprun
         shell: bash
