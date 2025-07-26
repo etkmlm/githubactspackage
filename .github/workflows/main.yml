@@ -91,10 +91,9 @@ jobs:
     needs: [build]
     name: Pack JAR For Windows
     runs-on: windows-latest
-    env:
-      JDK_HOME: java/jdk${{env.javaVersion}}
-      JRE_HOME: java/jre${{env.javaVersion}}
     steps:
+      - name: Push Environment Variables
+        run: echo "JDK_HOME=java/jdk${{env.javaVersion}}" >> $GITHUB_ENV && echo "JRE_HOME=java/jre${{env.javaVersion}}" >> $GITHUB_ENV
       - name: Get JAR Cache
         id: get-cache
         uses: actions/cache/restore@v4
