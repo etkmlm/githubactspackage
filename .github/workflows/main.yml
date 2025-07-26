@@ -154,7 +154,7 @@ jobs:
       - name: Java Extract
         if: steps.get-java-cache.outputs.cache-hit != 'true' && steps.java-down.outputs.result == 'true'
         shell: bash
-        run: tar -xzvf "${{steps.java-down.outputs.jdkFile}}" -C "$JDK_HOME" --stripComponents 1 && rm "${{steps.java-down.outputs.jdkFile}}" && tar -xzvf "${{steps.java-down.outputs.jreFile}}" -C "$JRE_HOME" --stripComponents 1 && rm "${{steps.java-down.outputs.jreFile}}"
+        run: tar -xzvf "${{steps.java-down.outputs.jdkFile}}" -C "$JDK_HOME" --strip-components 1 && rm "${{steps.java-down.outputs.jdkFile}}" && tar -xzvf "${{steps.java-down.outputs.jreFile}}" -C "$JRE_HOME" --strip-components 1 && rm "${{steps.java-down.outputs.jreFile}}"
       - name: Save Java Cache
         if: steps.get-java-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
