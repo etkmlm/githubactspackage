@@ -117,12 +117,16 @@ jobs:
 
             const fs = require('fs');
             const stream = require('stream');
-            fs.mkdir('java', e => {});
+            await exec.exec('mkdir java');
+
+            const jdkFileName = "java/jdk${{env.javaVersion}}.tar.gz";
+            const jreFileName = "java/jre${{env.javaVersion}}.tar.gz";
             
             const fetchJdk = await fetch(jdkResult[0].download_url);
             if (fetchJdk.ok && fetchJdk.body){
-              let writer = fs.createWriteStream("java/jdk.tar.gz");
+              let writer = fs.createWriteStream(jdkFileName);
               stream.Readable.fromWeb(fetchJdk.body).pipe(writer);
+              await exec.exec(`tar -xvzf ${jdkFileName} -C java && rm ${jdkFileName}`);
               console.log("JDK downloaded.");
             }
             else{
@@ -139,6 +143,7 @@ jobs:
             else{
               core.setFailed('JRE could not be downloaded.');
             }
+      - run: cd java && ls
       - name: Save Java Cache
         if: steps.get-java-cache.outputs.cache-hit != true
         uses: actions/cache/save@v4
