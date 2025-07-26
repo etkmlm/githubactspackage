@@ -170,9 +170,10 @@ jobs:
           path: ${{steps.get-jar.outputs.file}}
   pack-dmg-macos-old:
     needs: [build]
-    if: false
     name: Pack JAR For MacOS Non Apple Silicon
     runs-on: macos-13
+    permissions: write-all
+    if: false
     steps:
       - name: Get Cache
         id: get-cache
@@ -214,11 +215,12 @@ jobs:
       - name: Get JAR Name
         id: get-jar
         run: echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
         with:
-          name: macos-old-package-${{env.version}}
-          path: ${{steps.get-jar.outputs.file}}
+          files: "${{steps.get-jar.outputs.file}}"
+          
   pack-dmg-macos:
     needs: [build]
     name: Pack JAR For MacOS Apple Silicon
@@ -265,6 +267,8 @@ jobs:
       - name: Get JAR Name
         id: get-jar
         run: echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
+      - name: Rename File
+        run: file=${{steps.get-jar.outputs.file}} && mv "$file" "${file%.*}arm.dmg"
       - name: Upload Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
