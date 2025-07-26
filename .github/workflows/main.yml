@@ -34,6 +34,7 @@ jobs:
     name: Build and Create JAR File
     needs: [check-cache]
     runs-on: ubuntu-latest
+    permissions: write-all
     steps:
       - name: Checkout
         if: needs.check-cache.outputs.cache-hit != 'true'
