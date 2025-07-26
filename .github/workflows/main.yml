@@ -92,24 +92,27 @@ jobs:
     name: Pack JAR For Windows
     runs-on: windows-latest
     steps:
-      - name: Get Cache
+      - name: Get JAR Cache
         id: get-cache
         uses: actions/cache/restore@v4
         with:
           path: target/${{env.packageName}}
           key: jarpack-${{env.version}}
           enableCrossOsArchive: true
+      - name: Get Java Cache
+        id: get-java-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: java/*
+          key: win-java
       - name: Java Procession
+        if: steps.get-java-cache.outputs.cache-hit != true
         uses: actions/github-script@v7
         with:
           script: |
-            const cache = require('@actions/cache@v4');
-            const restore = cache.restoreCache(['java/*'], 'win-java', []);
-            if (!restore){
-              const jdkUrl = "https://api.azul.com/metadata/v1/zulu/packages/?java_version=${{env.javaVersion}}&os=linux&arch=x64&java_package_type=jdk&javafx_bundled=true&release_status=ga&availability_types=CA&archive_type=tar.gz&certifications=tck&latest=true";
-              const jreUrl = "https://api.azul.com/metadata/v1/zulu/packages/?java_version=${{env.javaVersion}}&os=linux&arch=x64&java_package_type=jre&javafx_bundled=true&release_status=ga&availability_types=CA&archive_type=tar.gz&certifications=tck&latest=true";
-              console.log(fetch(jdkUrl));
-            }
+            const jdkUrl = "https://api.azul.com/metadata/v1/zulu/packages/?java_version=${{env.javaVersion}}&os=linux&arch=x64&java_package_type=jdk&javafx_bundled=true&release_status=ga&availability_types=CA&archive_type=tar.gz&certifications=tck&latest=true";
+            const jreUrl = "https://api.azul.com/metadata/v1/zulu/packages/?java_version=${{env.javaVersion}}&os=linux&arch=x64&java_package_type=jre&javafx_bundled=true&release_status=ga&availability_types=CA&archive_type=tar.gz&certifications=tck&latest=true";
+            console.log(fetch(jdkUrl));
       
   pack-dmg-macos-old:
     needs: [build]
