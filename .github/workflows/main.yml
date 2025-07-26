@@ -133,7 +133,7 @@ jobs:
           --main-jar main.jar
           --app-version "${{env.version}}"
           --vendor "${{env.vendor}}"
-          --java-options "'-Duser.dir=\$APPDIR'"
+          --java-options "-Duser.dir=\$APPDIR"
           --win-dir-chooser
           --win-menu --win-menu-group "${{env.appName}}"
       - name: Get JAR Name
