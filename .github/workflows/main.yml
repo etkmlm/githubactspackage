@@ -169,6 +169,7 @@ jobs:
           path: ${{steps.get-jar.outputs.file}}
   pack-dmg-macos-old:
     needs: [build]
+    if: false
     name: Pack JAR For MacOS Non Apple Silicon
     runs-on: macos-13
     steps:
@@ -219,7 +220,6 @@ jobs:
           path: ${{steps.get-jar.outputs.file}}
   pack-dmg-macos:
     needs: [build]
-    if: false
     name: Pack JAR For MacOS Apple Silicon
     runs-on: macos-latest
     steps:
@@ -230,21 +230,42 @@ jobs:
           path: target/${{env.packageName}}
           key: jarpack-${{env.version}}
           enableCrossOsArchive: true
-      - name: Install Java
+      - name: Install Java JRE
         uses: actions/setup-java@v4
         with:
           distribution: ${{env.javaSource}}
           java-version: ${{env.javaVersion}}
           java-package: jre+fx
+      - name: Clone JRE Path
+        id: jre-clone
+        run: echo "path=$JAVA_HOME" >> $GITHUB_OUTPUT
+      - name: Install Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{env.javaSource}}
+          java-version: ${{env.javaVersion}}
+          java-package: jdk+fx
       - name: Copy Files
         run: mkdir app && cp "target/${{env.packageName}}" app/main.jar
       - name: Run jpackage
-        id: jprun
         shell: bash
-        run: jpackage --name "${{env.appName}}" --type dmg --input "${{env.appDir}}" --main-jar main.jar --app-version "${{env.version}}" --vendor "${{env.vendor}}" --java-options "'-Duser.dir=\$APPDIR'" --mac-package-name "${{env.appName}}" && echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
+        run: >
+          ${{env.JAVA_HOME}}/bin/jpackage
+          --name "${{env.appName}}"
+          --type dmg
+          --input "${{env.appDir}}"
+          --main-jar main.jar
+          --runtime-image "${{steps.jre-clone.outputs.path}}"
+          --app-version "${{env.version}}"
+          --vendor "${{env.vendor}}"
+          --java-options "'-Duser.dir=\$APPDIR'"
+          --mac-package-name "${{env.appName}}"
+      - name: Get JAR Name
+        id: get-jar
+        run: echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-package-${{env.version}}
-          path: ${{steps.jprun.outputs.file}}
+          path: ${{steps.get-jar.outputs.file}}
   
