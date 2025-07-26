@@ -134,7 +134,6 @@ jobs:
               let writer = fs.createWriteStream(jdkFileName);
               stream.Readable.fromWeb(fetchJdk.body).pipe(writer);
               core.setOutput('jdkFile', jdkFileName);
-              core.setOutput('jdkFolder'
               console.log("JDK downloaded.");
             }
             else{
