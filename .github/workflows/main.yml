@@ -106,6 +106,12 @@ jobs:
           distribution: ${{env.javaSource}}
           java-version: ${{env.javaVersion}}
           java-package: jdk+fx
+      - name: Install Java jre
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{env.javaSource}}
+          java-version: ${{env.javaVersion}}
+          java-package: jre+fx
       - name: Copy Files
         run: mkdir app && copy "target/${{env.packageName}}" app/main.jar
       - name: Run jpackage
