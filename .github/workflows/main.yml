@@ -171,7 +171,7 @@ jobs:
         run: mkdir app && copy "target/${{env.packageName}}" app/main.jar
       - run: pwd && ls
       - name: Run jpackage
-        run: | 
+        run: >
           ${{env.JDK_HOME}}/bin/jpackage.exe
           --name "${{env.appName}}"
           --type exe
