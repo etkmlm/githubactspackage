@@ -92,12 +92,9 @@ jobs:
     name: Pack JAR For Windows
     runs-on: windows-latest
     env:
-      JDK_HOME: j
-      JRE_HOME: j
+      JDK_HOME: java/jdk
+      JRE_HOME: java/jre
     steps:
-      - name: Push Environment Variables
-        shell: bash
-        run: export "JDK_HOME=java/jdk${{env.javaVersion}}" && export "JRE_HOME=java/jre${{env.javaVersion}}"
       - name: Get JAR Cache
         id: get-cache
         uses: actions/cache/restore@v4
@@ -110,7 +107,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: java/*
-          key: win-java
+          key: win-java-${{env.javaVersion}}
       - name: Java Download
         id: java-down
         if: steps.get-java-cache.outputs.cache-hit != 'true'
@@ -126,8 +123,8 @@ jobs:
             const stream = require('stream');
             await exec.exec('mkdir java');
 
-            const jdkFileName = "java/jdk${{env.javaVersion}}.tar.gz";
-            const jreFileName = "java/jre${{env.javaVersion}}.tar.gz";
+            const jdkFileName = "java/jdk.tar.gz";
+            const jreFileName = "java/jre.tar.gz";
             
             const fetchJdk = await fetch(jdkResult[0].download_url);
             if (fetchJdk.ok && fetchJdk.body){
@@ -163,7 +160,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: java/*
-          key: win-java
+          key: win-java-${{env.javaVersion}}
       - run: printenv
   pack-dmg-macos-old:
     needs: [build]
