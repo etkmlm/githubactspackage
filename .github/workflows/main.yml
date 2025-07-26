@@ -58,7 +58,6 @@ jobs:
           enableCrossOsArchive: true
   pack-deb-linux:
     needs: [build]
-    if: false
     name: Pack JAR For Linux
     runs-on: ubuntu-latest
     steps:
@@ -71,24 +70,46 @@ jobs:
           path: target/${{env.packageName}}
           key: jarpack-${{env.version}}
           enableCrossOsArchive: true
-      - name: Install Java
+      - name: Install Java JRE
         uses: actions/setup-java@v4
         with:
           distribution: ${{env.javaSource}}
           java-version: ${{env.javaVersion}}
           java-package: jre+fx
+      - name: Clone JRE Path
+        id: jre-clone
+        run: echo "path=$JAVA_HOME" >> $GITHUB_OUTPUT
+      - name: Install Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{env.javaSource}}
+          java-version: ${{env.javaVersion}}
+          java-package: jdk+fx
       - name: Prepare Files
         run: mkdir app && cp "target/${{env.packageName}}" app/main.jar
       - name: Run jpackage
-        id: jprun
-        run: jpackage --name "${{env.appName}}" --type deb --input "${{env.appDir}}" --main-jar main.jar --app-version "${{env.version}}" --vendor "$vendor" --java-options "'-Duser.dir=\$APPDIR'" --linux-menu-group "${{env.linuxCategory}}" && echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
+        run: >
+          ${{env.JAVA_HOME}}/bin/jpackage
+          --name "${{env.appName}}"
+          --type deb
+          --input "${{env.appDir}}"
+          --main-jar main.jar
+          --runtime-image "${{steps.jre-clone.outputs.path}}"
+          --app-version "${{env.version}}"
+          --vendor "$vendor"
+          --java-options "'-Duser.dir=\$APPDIR'"
+          --linux-menu-group "${{env.linuxCategory}}"
+      - name: Get JAR Name
+        id: get-jar
+        run: echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: linux-package-${{env.version}}
-          path: ${{steps.jprun.outputs.file}}
+          path: ${{steps.get-jar.outputs.file}}
   pack-exe-windows:
     needs: [build]
+    if: false
     name: Pack JAR For Windows
     runs-on: windows-latest
     env:
@@ -127,7 +148,7 @@ jobs:
         run: >
           ${{env.JAVA_HOME}}\bin\jpackage.exe
           --name "${{env.appName}}"
-          --type exe
+          --type msi
           --input "${{env.appDir}}"
           --runtime-image "${{steps.jre-clone.outputs.path}}"
           --main-jar main.jar
