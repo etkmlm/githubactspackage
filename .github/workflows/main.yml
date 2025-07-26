@@ -100,9 +100,9 @@ jobs:
           --java-options "'-Duser.dir=\$APPDIR'"
           --linux-menu-group "${{env.linuxCategory}}"
       - name: Get JAR Name
-        run: echo "FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
+        run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
       - name: Rename File
-        run: tempfile="$FILE" && echo "FILE=${tempfile%.*}-linux.deb" >> $GITHUB_ENV && mv "$tempfile" "$FILE"
+        run: tempfile="$ORG_FILE" && echo "FILE=${tempfile%.*}-linux.deb" >> $GITHUB_ENV && mv "$tempfile" "$FILE"
       - name: Upload Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
@@ -159,11 +159,9 @@ jobs:
           --win-dir-chooser
           --win-menu --win-menu-group "${{env.appName}}"
       - name: Get JAR Name
-        shell: bash
-        run: echo "FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
+        run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
       - name: Rename File
-        shell: bash
-        run: tempfile="$FILE" && echo "FILE=${tempfile%.*}-windows.exe" >> $GITHUB_ENV && mv "$tempfile" "$FILE"
+        run: tempfile="$ORG_FILE" && echo "FILE=${tempfile%.*}-windows.msi" >> $GITHUB_ENV && mv "$tempfile" "$FILE"
       - name: Upload Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
@@ -213,9 +211,9 @@ jobs:
           --java-options "'-Duser.dir=\$APPDIR'"
           --mac-package-name "${{env.appName}}"
       - name: Get JAR Name
-        run: echo "FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
+        run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
       - name: Rename File
-        run: tempfile="$FILE" && echo "FILE=${tempfile%.*}-macos.dmg" >> $GITHUB_ENV && mv "$tempfile" "$FILE"
+        run: tempfile="$ORG_FILE" && echo "FILE=${tempfile%.*}-macos.dmg" >> $GITHUB_ENV && mv "$tempfile" "$FILE"
       - name: Upload Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
@@ -265,9 +263,9 @@ jobs:
           --java-options "'-Duser.dir=\$APPDIR'"
           --mac-package-name "${{env.appName}}"
       - name: Get JAR Name
-        run: echo "FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
+        run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
       - name: Rename File
-        run: tempfile="$FILE" && echo "FILE=${tempfile%.*}-macos-arm.dmg" >> $GITHUB_ENV && mv "$tempfile" "$FILE"
+        run: tempfile="$ORG_FILE" && echo "FILE=${tempfile%.*}-macos-arm.dmg" >> $GITHUB_ENV && mv "$tempfile" "$FILE"
       - name: Upload Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
