@@ -117,7 +117,7 @@ jobs:
 
             const fs = require('fs');
             const stream = require('stream');
-            fs.mkDir('java');
+            fs.mkdir('java');
             
             const fetchJdk = await fetch(jdkResult[0].download_url);
             if (fetchJdk.ok && fetchJdk.body){
