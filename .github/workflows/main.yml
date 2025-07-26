@@ -76,7 +76,7 @@ jobs:
         with:
           distribution: ${{env.javaSource}}
           java-version: ${{env.javaVersion}}
-          java-package: ${{env.javaPackage}}
+          java-package: jre-fx
       - name: Prepare Files
         run: mkdir app && cp "target/${{env.packageName}}" app/main.jar
       - name: Run jpackage
@@ -104,7 +104,7 @@ jobs:
         with:
           distribution: ${{env.javaSource}}
           java-version: ${{env.javaVersion}}
-          java-package: ${{env.javaPackage}}
+          java-package: jre-fx
       - name: Copy Files
         run: mkdir app && copy "target/${{env.packageName}}" app/main.jar
       - name: Run jpackage
@@ -115,5 +115,34 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-package-${{env.version}}
+          path: ${{steps.jprun.outputs.file}}
+  pack-exe-macos-old:
+    needs: [build]
+    name: Pack JAR For MacOS Non Apple Silicon
+    runs-on: macos-latest-large
+    steps:
+      - name: Get Cache
+        id: get-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: target/${{env.packageName}}
+          key: jarpack-${{env.version}}
+          enableCrossOsArchive: true
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{env.javaSource}}
+          java-version: ${{env.javaVersion}}
+          java-package: jre-fx
+      - name: Copy Files
+        run: mkdir app && copy "target/${{env.packageName}}" app/main.jar
+      - name: Run jpackage
+        id: jprun
+        shell: bash
+        run: jpackage --name "${{env.appName}}" --type dmg --input "${{env.appDir}}" --main-jar main.jar --app-version "${{env.version}}" --vendor "${{env.vendor}}" --java-options "'-Duser.dir=\$APPDIR'" --mac-package-name ${{env.appName}} && echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-old-package-${{env.version}}
           path: ${{steps.jprun.outputs.file}}
   
