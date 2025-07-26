@@ -118,7 +118,7 @@ jobs:
             const fs = require('fs');
             const stream = require('stream');
             
-            const fetchJdk = await fetch(jdkResult);
+            const fetchJdk = await fetch(jdkResult[0].download_url);
             if (fetchJdk.ok && fetchJdk.body){
               let writer = fs.createWriteStream('java/jdk.tar.gz');
               stream.Readable.fromWeb(resp.body).pipe(writer);
