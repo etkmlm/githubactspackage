@@ -118,7 +118,7 @@ jobs:
           path: ${{steps.jprun.outputs.file}}
   pack-exe-macos-old:
     needs: [build]
-    name: Pack JAR For MacOS Non Apple Silicon
+    name: Pack JAR For MacOS Non Apple Siliconn
     runs-on: macos-13
     steps:
       - name: Get Cache
