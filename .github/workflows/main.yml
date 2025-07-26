@@ -89,7 +89,6 @@ jobs:
           path: ${{steps.jprun.outputs.file}}
   pack-exe-windows:
     needs: [build]
-    
     name: Pack JAR For Windows
     runs-on: windows-latest
     steps:
@@ -100,30 +99,18 @@ jobs:
           path: target/${{env.packageName}}
           key: jarpack-${{env.version}}
           enableCrossOsArchive: true
-      - name: Install Java JDK
-        uses: actions/setup-java@v4
+      - name: Java Procession
+        uses: actions/github-script@v7
         with:
-          distribution: ${{env.javaSource}}
-          java-version: ${{env.javaVersion}}
-          java-package: jdk+fx
-      - name: Install Java Runtime
-        uses: actions/setup-java@v4
-        with:
-          distribution: ${{env.javaSource}}
-          java-version: ${{env.javaVersion}}
-          java-package: jre+fx
-      - run: printenv
-      - name: Copy Files
-        run: mkdir app && copy "target/${{env.packageName}}" app/main.jar
-      - name: Run jpackage
-        id: jprun
-        shell: bash
-        run: $JAVA_HOME_17_X64/bin/jpackage.exe --name "${{env.appName}}" --type exe --input "${{env.appDir}}" --runtime-image "$JAVA_HOME" --main-jar main.jar --app-version "${{env.version}}" --vendor "${{env.vendor}}" --java-options "'-Duser.dir=\$APPDIR'" --win-dir-chooser --win-menu --win-menu-group "${{env.appName}}" && echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-package-${{env.version}}
-          path: ${{steps.jprun.outputs.file}}
+          script: |
+            const cache = require('@actions/cache');
+            const restore = cache.restoreCache(['java/*'], 'win-java', []);
+            if (!restore){
+              const jdkUrl = "https://api.azul.com/metadata/v1/zulu/packages/?java_version=${{env.javaVersion}}&os=linux&arch=x64&java_package_type=jdk&javafx_bundled=true&release_status=ga&availability_types=CA&archive_type=tar.gz&certifications=tck&latest=true";
+              const jreUrl = "https://api.azul.com/metadata/v1/zulu/packages/?java_version=${{env.javaVersion}}&os=linux&arch=x64&java_package_type=jre&javafx_bundled=true&release_status=ga&availability_types=CA&archive_type=tar.gz&certifications=tck&latest=true";
+              console.log(fetch(jdkUrl));
+            }
+      
   pack-dmg-macos-old:
     needs: [build]
     if: false
