@@ -93,6 +93,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Push Environment Variables
+        shell: bash
         run: export "JDK_HOME=java/jdk${{env.javaVersion}}" && export "JRE_HOME=java/jre${{env.javaVersion}}"
       - name: Get JAR Cache
         id: get-cache
