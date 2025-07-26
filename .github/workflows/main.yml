@@ -161,7 +161,6 @@ jobs:
           mkdir "$JDK_HOME" && mkdir "$JRE_HOME" && 
           unzip "${{steps.java-down.outputs.jdkFile}}" -d "$JDK_HOME" && jdff=$(ls "$JDK_HOME" | head -1) && mv "$JDK_HOME/${jdff}"/* "$JDK_HOME/" && rm -r "${{steps.java-down.outputs.jdkFile}}" "$JDK_HOME/${jdff}" && 
           unzip "${{steps.java-down.outputs.jreFile}}" -d "$JRE_HOME" && jrff=$(ls "$JRE_HOME" | head -1) && mv "$JRE_HOME/${jrff}"/* "$JRE_HOME/" && rm -r "${{steps.java-down.outputs.jreFile}}" "$JRE_HOME/${jrff}"
-      - run: cd "java\\jdk" && ls
       - name: Save Java Cache
         if: steps.get-java-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
@@ -170,9 +169,19 @@ jobs:
           key: win-java-${{env.javaVersion}}
       - name: Copy Files
         run: mkdir app && copy "target/${{env.packageName}}" app/main.jar
-      - run: cd ${{env.JDK_HOME}}/bin && ls
       - name: Run jpackage
-        run: '${{env.JDK_HOME}}/bin/jpackage.exe --name "${{env.appName}}" --type exe --input "${{env.appDir}}" --runtime-image "$JRE_HOME" --main-jar main.jar --app-version "${{env.version}}" --vendor "${{env.vendor}}" --java-options "''-Duser.dir=\$APPDIR''" --win-dir-chooser --win-menu --win-menu-group "${{env.appName}}"'
+        run: | 
+          '${{env.JDK_HOME}}/bin/jpackage.exe 
+          --name "${{env.appName}}" 
+          --type exe 
+          --input "${{env.appDir}}" 
+          --runtime-image "${{env.JRE_HOME}}" 
+          --main-jar main.jar 
+          --app-version "${{env.version}}" 
+          --vendor "${{env.vendor}}" 
+          --java-options "''-Duser.dir=\$APPDIR''" 
+          --win-dir-chooser 
+          --win-menu --win-menu-group "${{env.appName}}"'
       - name: Get JAR Name
         id: get-jar
         shell: bash
