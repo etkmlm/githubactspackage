@@ -121,11 +121,11 @@ jobs:
         run: mkdir app && copy "target/${{env.packageName}}" app/main.jar
       - name: Run jpackage
         run: >
-          ${{env.JAVA_HOME}}\bin\jpackage.exe
+          ${{env.JAVA_HOME_17_X64}}\bin\jpackage.exe
           --name "${{env.appName}}"
           --type exe
           --input "${{env.appDir}}"
-          --runtime-image "${{env.JAVA_HOME_17_X64}}"
+          --runtime-image "${{env.JAVA_HOME}}"
           --main-jar main.jar
           --app-version "${{env.version}}"
           --vendor "${{env.vendor}}"
