@@ -105,18 +105,20 @@ jobs:
           path: target/${{env.packageName}}
           key: jarpack-${{env.version}}
           enableCrossOsArchive: true
-      - name: Install Java JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: ${{env.javaSource}}
-          java-version: ${{env.javaVersion}}
-          java-package: jdk+fx
       - name: Install Java JRE
         uses: actions/setup-java@v4
         with:
           distribution: ${{env.javaSource}}
           java-version: ${{env.javaVersion}}
           java-package: jre+fx
+      - name: Install Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{env.javaSource}}
+          java-version: ${{env.javaVersion}}
+          java-package: jdk+fx
+      
+      - run: printenv
       - name: Copy Files
         run: mkdir app && copy "target/${{env.packageName}}" app/main.jar
       - name: Run jpackage
