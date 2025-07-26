@@ -135,7 +135,7 @@ jobs:
           java-version: ${{env.javaVersion}}
           java-package: jre+fx
       - name: Copy Files
-        run: mkdir app && copy "target/${{env.packageName}}" app/main.jar
+        run: mkdir app && cp "target/${{env.packageName}}" app/main.jar
       - name: Run jpackage
         id: jprun
         shell: bash
