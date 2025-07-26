@@ -102,7 +102,7 @@ jobs:
       - name: Get JAR Name
         run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
       - name: Rename File
-        run: tempfile="$ORG_FILE" && echo "FILE=${tempfile%.*}-linux.deb" >> $GITHUB_ENV && mv "$tempfile" "$FILE"
+        run: tempfile="$ORG_FILE" && file="${tempfile%.*}-linux.deb" && echo "FILE=$file" >> $GITHUB_ENV && mv "$tempfile" "$file"
       - name: Upload Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
@@ -159,9 +159,11 @@ jobs:
           --win-dir-chooser
           --win-menu --win-menu-group "${{env.appName}}"
       - name: Get JAR Name
+        shell: bash
         run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
       - name: Rename File
-        run: tempfile="$ORG_FILE" && echo "FILE=${tempfile%.*}-windows.msi" >> $GITHUB_ENV && mv "$tempfile" "$FILE"
+        shell: bash
+        run: tempfile="$ORG_FILE" && file="${tempfile%.*}-windows.msi" && echo "FILE=$file" >> $GITHUB_ENV && mv "$tempfile" "$file"
       - name: Upload Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
@@ -213,7 +215,7 @@ jobs:
       - name: Get JAR Name
         run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
       - name: Rename File
-        run: tempfile="$ORG_FILE" && echo "FILE=${tempfile%.*}-macos.dmg" >> $GITHUB_ENV && mv "$tempfile" "$FILE"
+        run: tempfile="$ORG_FILE" && file="${tempfile%.*}-macos.dmg" && echo "FILE=$file" >> $GITHUB_ENV && mv "$tempfile" "$file"
       - name: Upload Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
@@ -265,7 +267,7 @@ jobs:
       - name: Get JAR Name
         run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
       - name: Rename File
-        run: tempfile="$ORG_FILE" && echo "FILE=${tempfile%.*}-macos-arm.dmg" >> $GITHUB_ENV && mv "$tempfile" "$FILE"
+        run: tempfile="$ORG_FILE" && file="${tempfile%.*}-macos-arm.dmg" && echo "FILE=$file" >> $GITHUB_ENV && mv "$tempfile" "$file"
       - name: Upload Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
