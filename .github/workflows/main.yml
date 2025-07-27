@@ -12,6 +12,7 @@ env:
   appDir: app
   linuxCategory: Game
   linuxPackageName: test-hello
+  #linuxDependencies: libc6, libgcc-s1, libstdc++6, xdg-utils
   vendor: etkmlm
   javaVersion: 17
   javaSource: zulu
@@ -118,6 +119,7 @@ jobs:
           --vendor "$vendor"
           --java-options "'-Duser.dir=\$APPDIR'"
           --linux-menu-group "${{env.linuxCategory}}"
+          --linux-package-deps "${{env.linuxDependencies}}"
       - name: Get JAR Name
         run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
       - name: Rename File
@@ -129,7 +131,7 @@ jobs:
           files: "${{env.FILE}}"
   pack-windows:
     needs: [build]
-    if: true
+    if: false
     name: Pack JAR For Windows
     runs-on: windows-latest
     permissions: write-all
@@ -194,7 +196,7 @@ jobs:
           files: "${{env.FILE}}"
   pack-macos-old:
     needs: [build]
-    if: true
+    if: false
     name: Pack JAR For MacOS Non Apple Silicon
     runs-on: macos-13
     permissions: write-all
@@ -250,7 +252,7 @@ jobs:
           files: "${{env.FILE}}"    
   pack-macos:
     needs: [build]
-    if: true
+    if: false
     name: Pack JAR For MacOS Apple Silicon
     runs-on: macos-latest
     permissions: write-all
