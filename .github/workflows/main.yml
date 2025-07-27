@@ -129,7 +129,7 @@ jobs:
           files: "${{env.FILE}}"
   pack-exe-windows:
     needs: [build]
-    if: false
+    if: true
     name: Pack JAR For Windows
     runs-on: windows-latest
     permissions: write-all
@@ -193,7 +193,7 @@ jobs:
           files: "${{env.FILE}}"
   pack-dmg-macos-old:
     needs: [build]
-    if: false
+    if: true
     name: Pack JAR For MacOS Non Apple Silicon
     runs-on: macos-13
     permissions: write-all
@@ -248,7 +248,7 @@ jobs:
           files: "${{env.FILE}}"    
   pack-dmg-macos:
     needs: [build]
-    if: false
+    if: true
     name: Pack JAR For MacOS Apple Silicon
     runs-on: macos-latest
     permissions: write-all
