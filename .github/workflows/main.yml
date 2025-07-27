@@ -2,6 +2,7 @@ name: Build and Package
 
 on:
   push:
+    tags: [ v* ]
 
 # Only trigger when a commit is pushed with tag starts with v.
 
@@ -11,57 +12,69 @@ env:
   appDir: app
   linuxCategory: Game
   linuxPackageName: test-hello
-  version: 1.1.91
+  #version: 1.1.91
   vendor: etkmlm
   javaVersion: 17
   javaSource: zulu
-  javaPackage: jdk+fx
+  icon: actions/resources/favicon
+  buildLinux: true
+  buildWindows: false
+  buildMacos: false
+  buildMacosArm: false
 
 jobs:
-  check-cache:
-    name: Check JAR Cache
+  build:
+    name: Process Project JAR File
     runs-on: ubuntu-latest
+    permissions: write-all
     outputs:
-      cache-hit: ${{steps.get-cache.outputs.cache-hit}}
-    steps: 
+      version: ${{ steps.identify.outputs.version }}
+    steps:
+      - name: Identify Version
+        id: identify
+        run: tag="${{github.ref_name}}" && echo "version=${tag:1}" >> $GITHUB_OUTPUT
       - id: get-cache
+        name: Get JAR Cache
         uses: actions/cache/restore@v4
         with:
-          path: target/${{env.packageName}}
-          key: jarpack-${{env.version}}
+          path: target/*
+          key: jarpack-${{steps.identify.outputs.version}}
           enableCrossOsArchive: true
-  build:
-    name: Build and Create JAR File
-    needs: [check-cache]
-    runs-on: ubuntu-latest
-    steps:
       - name: Checkout
-        if: needs.check-cache.outputs.cache-hit != 'true'
+        if: steps.get-cache.outputs.cache-hit != 'true'
         uses: actions/checkout@v4
       - name: Install Java
-        if: needs.check-cache.outputs.cache-hit != 'true'
+        if: steps.get-cache.outputs.cache-hit != 'true'
         uses: actions/setup-java@v4
         with:
           distribution: ${{env.javaSource}}
           java-version: ${{env.javaVersion}}
-          java-package: ${{env.javaPackage}}
+          java-package: jdk+fx
           cache: 'maven'
       - name: Build
-        if: needs.check-cache.outputs.cache-hit != 'true'
-        run: mvn clean package shade:shade
+        if: steps.get-cache.outputs.cache-hit != 'true'
+        run: mvn clean package shade:shade && mv "${{env.icon}}".* "target"
       - name: Cache JAR
         id: cache
-        if: always() && needs.check-cache.outputs.cache-hit != 'true'
+        if: always() && steps.get-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
-          path: target/${{env.packageName}}
-          key: jarpack-${{env.version}}
+          path: |
+            target/${{env.packageName}}
+            target/favicon.*
+          key: jarpack-${{steps.identify.outputs.version}}
           enableCrossOsArchive: true
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          files: "target/${{env.packageName}}"
   pack-deb-linux:
     needs: [build]
-    if: false
+    if: env.buildLinux == 'true'
     name: Pack JAR For Linux
     runs-on: ubuntu-latest
+    permissions: write-all
     steps:
       - name: Install jpackage Dependencies
         run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev fakeroot dpkg-dev
@@ -69,55 +82,214 @@ jobs:
         id: get-cache
         uses: actions/cache/restore@v4
         with:
-          path: target/${{env.packageName}}
-          key: jarpack-${{env.version}}
+          path: target/*
+          key: jarpack-${{needs.build.outputs.version}}
           enableCrossOsArchive: true
-      - name: Install Java
+      - name: Install Java JRE
         uses: actions/setup-java@v4
         with:
           distribution: ${{env.javaSource}}
           java-version: ${{env.javaVersion}}
-          java-package: ${{env.javaPackage}}
-          cache: 'maven'
+          java-package: jre+fx
+      - name: Clone JRE Path
+        id: jre-clone
+        run: echo "path=$JAVA_HOME" >> $GITHUB_OUTPUT
+      - name: Install Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{env.javaSource}}
+          java-version: ${{env.javaVersion}}
+          java-package: jdk+fx
       - name: Prepare Files
         run: mkdir app && cp "target/${{env.packageName}}" app/main.jar
       - name: Run jpackage
-        id: jprun
-        run: jpackage --name "${{env.appName}}" --type deb --input "${{env.appDir}}" --main-jar main.jar --app-version "${{env.version}}" --vendor "$vendor" --java-options "'-Duser.dir=\$APPDIR'" --linux-menu-group "${{env.linuxCategory}}" && echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        run: >
+          ${{env.JAVA_HOME}}/bin/jpackage
+          --name "${{env.appName}}"
+          --type deb
+          --input "${{env.appDir}}"
+          --main-jar main.jar
+          --icon "target/favicon.png"
+          --runtime-image "${{steps.jre-clone.outputs.path}}"
+          --app-version "${{needs.build.outputs.version}}"
+          --vendor "$vendor"
+          --java-options "'-Duser.dir=\$APPDIR'"
+          --linux-menu-group "${{env.linuxCategory}}"
+      - name: Get JAR Name
+        run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
+      - name: Rename File
+        run: tempfile="$ORG_FILE" && file="${tempfile%.*}-linux.deb" && echo "FILE=$file" >> $GITHUB_ENV && mv "$tempfile" "$file"
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
         with:
-          name: linux-package-${{env.version}}
-          path: ${{steps.jprun.outputs.file}}
+          files: "${{env.FILE}}"
   pack-exe-windows:
     needs: [build]
+    if: env.buildWindows == 'true'
     name: Pack JAR For Windows
     runs-on: windows-latest
+    permissions: write-all
+    env:
+      JDK_HOME: java/jdk
+      JRE_HOME: java/jre
+      ZULU_OS: windows
+      ZULU_ARCH: x64
+      ZULU_TYPE: zip
     steps:
-      - uses: actions/checkout@v4
+      - name: Get JAR Cache
+        id: get-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: target/${{env.packageName}}
+          key: jarpack-${{needs.build.outputs.version}}
+          enableCrossOsArchive: true
+      - name: Install Java JRE
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{env.javaSource}}
+          java-version: ${{env.javaVersion}}
+          java-package: jre+fx
+      - name: Clone JRE Path
+        id: jre-clone
+        shell: bash
+        run: echo "path=$JAVA_HOME" >> $GITHUB_OUTPUT
+      - name: Install Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{env.javaSource}}
+          java-version: ${{env.javaVersion}}
+          java-package: jdk+fx
+      - name: Copy Files
+        run: mkdir app && copy "target/${{env.packageName}}" app/main.jar
+      - name: Run jpackage
+        run: >
+          ${{env.JAVA_HOME}}\bin\jpackage.exe
+          --name "${{env.appName}}"
+          --type msi
+          --input "${{env.appDir}}"
+          --runtime-image "${{steps.jre-clone.outputs.path}}"
+          --main-jar main.jar
+          --app-version "${{needs.build.outputs.version}}"
+          --vendor "${{env.vendor}}"
+          --java-options "'-Duser.dir=`$APPDIR'"
+          --win-dir-chooser
+          --win-menu --win-menu-group "${{env.appName}}"
+      - name: Get JAR Name
+        shell: bash
+        run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
+      - name: Rename File
+        shell: bash
+        run: tempfile="$ORG_FILE" && file="${tempfile%.*}-windows.msi" && echo "FILE=$file" >> $GITHUB_ENV && mv "$tempfile" "$file"
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          files: "${{env.FILE}}"
+  pack-dmg-macos-old:
+    needs: [build]
+    if: env.buildMacos == 'true'
+    name: Pack JAR For MacOS Non Apple Silicon
+    runs-on: macos-13
+    permissions: write-all
+    steps:
       - name: Get Cache
         id: get-cache
         uses: actions/cache/restore@v4
         with:
           path: target/${{env.packageName}}
-          key: jarpack-${{env.version}}
+          key: jarpack-${{needs.build.outputs.version}}
           enableCrossOsArchive: true
-      - name: Install Java
+      - name: Install Java JRE
         uses: actions/setup-java@v4
         with:
           distribution: ${{env.javaSource}}
           java-version: ${{env.javaVersion}}
-          java-package: ${{env.javaPackage}}
-          cache: 'maven'
-      - name: Copy Files
-        run: mkdir app && copy "target/${{env.packageName}}" app/main.jar
-      - name: Run jpackage
-        id: jprun
-        shell: bash
-        run: jpackage --name "${{env.appName}}" --type exe --input "${{env.appDir}}" --main-jar main.jar --app-version "${{env.version}}" --vendor "${{env.vendor}}" --java-options "'-Duser.dir=$APPDIR'" --win-dir-chooser --win-menu --win-menu-group "${{env.appName}}" && echo "file=$( ls -Art | tail -n 1 )" >> $GITHUB_OUTPUT
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+          java-package: jre+fx
+      - name: Clone JRE Path
+        id: jre-clone
+        run: echo "path=$JAVA_HOME" >> $GITHUB_OUTPUT
+      - name: Install Java JDK
+        uses: actions/setup-java@v4
         with:
-          name: windows-package-${{env.version}}
-          path: ${{steps.jprun.outputs.file}}
+          distribution: ${{env.javaSource}}
+          java-version: ${{env.javaVersion}}
+          java-package: jdk+fx
+      - name: Copy Files
+        run: mkdir app && cp "target/${{env.packageName}}" app/main.jar
+      - name: Run jpackage
+        shell: bash
+        run: >
+          ${{env.JAVA_HOME}}/bin/jpackage
+          --name "${{env.appName}}"
+          --type dmg
+          --input "${{env.appDir}}"
+          --main-jar main.jar
+          --runtime-image "${{steps.jre-clone.outputs.path}}"
+          --app-version "${{needs.build.outputs.version}}"
+          --vendor "${{env.vendor}}"
+          --java-options "'-Duser.dir=\$APPDIR'"
+          --mac-package-name "${{env.appName}}"
+      - name: Get JAR Name
+        run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
+      - name: Rename File
+        run: tempfile="$ORG_FILE" && file="${tempfile%.*}-macos.dmg" && echo "FILE=$file" >> $GITHUB_ENV && mv "$tempfile" "$file"
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          files: "${{env.FILE}}"    
+  pack-dmg-macos:
+    needs: [build]
+    if: env.buildMacosArm == 'true'
+    name: Pack JAR For MacOS Apple Silicon
+    runs-on: macos-latest
+    permissions: write-all
+    steps:
+      - name: Get Cache
+        id: get-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: target/${{env.packageName}}
+          key: jarpack-${{needs.build.outputs.version}}
+          enableCrossOsArchive: true
+      - name: Install Java JRE
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{env.javaSource}}
+          java-version: ${{env.javaVersion}}
+          java-package: jre+fx
+      - name: Clone JRE Path
+        id: jre-clone
+        run: echo "path=$JAVA_HOME" >> $GITHUB_OUTPUT
+      - name: Install Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{env.javaSource}}
+          java-version: ${{env.javaVersion}}
+          java-package: jdk+fx
+      - name: Copy Files
+        run: mkdir app && cp "target/${{env.packageName}}" app/main.jar
+      - name: Run jpackage
+        shell: bash
+        run: >
+          ${{env.JAVA_HOME}}/bin/jpackage
+          --name "${{env.appName}}"
+          --type dmg
+          --input "${{env.appDir}}"
+          --main-jar main.jar
+          --runtime-image "${{steps.jre-clone.outputs.path}}"
+          --app-version "${{needs.build.outputs.version}}"
+          --vendor "${{env.vendor}}"
+          --java-options "'-Duser.dir=\$APPDIR'"
+          --mac-package-name "${{env.appName}}"
+      - name: Get JAR Name
+        run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
+      - name: Rename File
+        run: tempfile="$ORG_FILE" && file="${tempfile%.*}-macos-arm.dmg" && echo "FILE=$file" >> $GITHUB_ENV && mv "$tempfile" "$file"
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          files: "${{env.FILE}}"
   
