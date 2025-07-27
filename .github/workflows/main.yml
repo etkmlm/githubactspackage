@@ -70,7 +70,7 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           files: "target/${{steps.ipkg.outputs.name}}"
-  pack-deb-linux:
+  pack-linux:
     needs: [build]
     if: true
     name: Pack JAR For Linux
@@ -127,7 +127,7 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           files: "${{env.FILE}}"
-  pack-exe-windows:
+  pack-windows:
     needs: [build]
     if: true
     name: Pack JAR For Windows
@@ -173,7 +173,7 @@ jobs:
           --name "${{env.appName}}"
           --type msi
           --input "${{env.appDir}}"
-          --icon "target\\favicon.png"
+          --icon "target\\favicon.ico"
           --runtime-image "${{steps.jre-clone.outputs.path}}"
           --main-jar main.jar
           --app-version "${{needs.build.outputs.version}}"
@@ -192,7 +192,7 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           files: "${{env.FILE}}"
-  pack-dmg-macos-old:
+  pack-macos-old:
     needs: [build]
     if: true
     name: Pack JAR For MacOS Non Apple Silicon
@@ -248,7 +248,7 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           files: "${{env.FILE}}"    
-  pack-dmg-macos:
+  pack-macos:
     needs: [build]
     if: true
     name: Pack JAR For MacOS Apple Silicon
@@ -304,4 +304,16 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           files: "${{env.FILE}}"
-  
+  clear-caches:
+    needs: [build, pack-linux, pack-windows, pack-macos-old, pack-macos]
+    if: true
+    name: Clear Project Caches
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - run: gh cache delete jarpack-${{needs.build.outputs.version}}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
