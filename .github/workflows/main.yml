@@ -187,7 +187,7 @@ jobs:
           --java-options "'-Duser.dir=`$APPDIR'"
           --win-dir-chooser
           --win-menu --win-menu-group "${{env.appName}}"
-      - name: Get JAR Name
+      - name: Get Pack Name
         shell: bash
         run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
       - name: Rename File
@@ -245,7 +245,7 @@ jobs:
           --vendor "${{env.vendor}}"
           --java-options "'-Duser.dir=\$APPDIR'"
           --mac-package-name "${{env.appName}}"
-      - name: Get JAR Name
+      - name: Get Pack Name
         run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
       - name: Rename File
         run: tempfile="$ORG_FILE" && file="${tempfile%.*}-macos.dmg" && echo "FILE=$file" >> $GITHUB_ENV && mv "$tempfile" "$file"
@@ -301,7 +301,7 @@ jobs:
           --vendor "${{env.vendor}}"
           --java-options "'-Duser.dir=\$APPDIR'"
           --mac-package-name "${{env.appName}}"
-      - name: Get JAR Name
+      - name: Get Pack Name
         run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
       - name: Rename File
         run: tempfile="$ORG_FILE" && file="${tempfile%.*}-macos-arm.dmg" && echo "FILE=$file" >> $GITHUB_ENV && mv "$tempfile" "$file"
