@@ -313,7 +313,7 @@ jobs:
       actions: write
       contents: read
     steps:
-      - run: gh cache delete jarpack-${{needs.build.outputs.version}}
+      - run: gh cache delete jarpack-${{needs.build.outputs.version}} --repo ${{github.repository}}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
