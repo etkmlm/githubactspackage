@@ -118,9 +118,14 @@ jobs:
           --vendor "$vendor"
           --java-options "'-Duser.dir=\$APPDIR'"
           --linux-menu-group "${{env.linuxCategory}}"
-          --linux-package-deps "${{env.linuxDependencies}}"
-      - name: Get JAR Name
+      - name: Get Pack Name
         run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
+      - name: Modify Dependencies
+        run: |
+          dpkg-deb -R "$ORG_FILE" temp && 
+          awk '/^Depends:/ { print "Depends: ${{env.linuxDependencies}}"; next }1' temp/DEBIAN/control > tempcon && 
+          mv tempcon temp/DEBIAN/control && 
+          dpkg-deb -b temp "$ORG_FILE"
       - name: Rename File
         run: tempfile="$ORG_FILE" && file="${tempfile%.*}-linux.deb" && echo "FILE=$file" >> $GITHUB_ENV && mv "$tempfile" "$file"
       - name: Upload Release
