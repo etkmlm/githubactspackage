@@ -1,10 +1,8 @@
 name: Build and Package
 
 on:
-  push:
-    tags: [ v* ]
-
-# Only trigger when a commit is pushed with tag starts with v.
+  release:
+    types: [created]
 
 env:
   #customPackageName: githubactspackage-1.0-SNAPSHOT.jar
@@ -23,13 +21,14 @@ jobs:
     name: Process Project JAR File
     runs-on: ubuntu-latest
     permissions: write-all
+    if: startsWith(github.event.release.tag_name, 'v')
     outputs:
       version: ${{ steps.iver.outputs.version }}
       packageName: ${{ steps.ipkg.outputs.name }}
     steps:
       - name: Identify Version
         id: iver
-        run: tag="${{github.ref_name}}" && echo "version=${tag:1}" >> $GITHUB_OUTPUT
+        run: tag="${{github.event.release.tag_name}}" && echo "version=${tag:1}" >> $GITHUB_OUTPUT
       - name: Identify Package Name
         id: ipkg
         run: if [ -z "${{env.customPackageName}}" ]; then echo "name=${{github.event.repository.name}}-${{steps.iver.outputs.version}}.jar" >> $GITHUB_OUTPUT; else echo "name=${{env.customPackageName}}" >> $GITHUB_OUTPUT; fi
