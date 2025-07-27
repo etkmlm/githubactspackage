@@ -71,7 +71,7 @@ jobs:
           files: "target/${{env.packageName}}"
   pack-deb-linux:
     needs: [build]
-    if: ${{env.buildLinux}} == 'true'
+    if: env.buildLinux == 'true'
     name: Pack JAR For Linux
     runs-on: ubuntu-latest
     permissions: write-all
@@ -126,7 +126,7 @@ jobs:
           files: "${{env.FILE}}"
   pack-exe-windows:
     needs: [build]
-    if: ${{env.buildWindows}} == 'true'
+    if: env.buildWindows == 'true'
     name: Pack JAR For Windows
     runs-on: windows-latest
     permissions: write-all
@@ -188,7 +188,7 @@ jobs:
           files: "${{env.FILE}}"
   pack-dmg-macos-old:
     needs: [build]
-    if: ${{env.buildMacos}} == 'true'
+    if: env.buildMacos == 'true'
     name: Pack JAR For MacOS Non Apple Silicon
     runs-on: macos-13
     permissions: write-all
@@ -241,7 +241,7 @@ jobs:
           files: "${{env.FILE}}"    
   pack-dmg-macos:
     needs: [build]
-    if: ${{env.buildMacosArm}} == 'true'
+    if: env.buildMacosArm == 'true'
     name: Pack JAR For MacOS Apple Silicon
     runs-on: macos-latest
     permissions: write-all
