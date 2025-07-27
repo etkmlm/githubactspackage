@@ -2,7 +2,7 @@ name: Build and Package
 
 on:
   release:
-    types: [created,published]
+    types: [created]
 
 env:
   #customPackageName: githubactspackage-1.0-SNAPSHOT.jar
