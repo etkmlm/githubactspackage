@@ -7,20 +7,15 @@ on:
 # Only trigger when a commit is pushed with tag starts with v.
 
 env:
-  packageName: githubactspackage-1.0-SNAPSHOT.jar
+  #customPackageName: githubactspackage-1.0-SNAPSHOT.jar
   appName: Test Hello
   appDir: app
   linuxCategory: Game
   linuxPackageName: test-hello
-  #version: 1.1.91
   vendor: etkmlm
   javaVersion: 17
   javaSource: zulu
   icon: actions/resources/favicon
-  buildLinux: true
-  buildWindows: false
-  buildMacos: false
-  buildMacosArm: false
 
 jobs:
   build:
@@ -28,17 +23,22 @@ jobs:
     runs-on: ubuntu-latest
     permissions: write-all
     outputs:
-      version: ${{ steps.identify.outputs.version }}
+      version: ${{ steps.iver.outputs.version }}
+      packageName: ${{ steps.ipkg.outputs.name }}
     steps:
       - name: Identify Version
-        id: identify
+        id: iver
         run: tag="${{github.ref_name}}" && echo "version=${tag:1}" >> $GITHUB_OUTPUT
+      - name: Identify Package Name
+        id: ipkg
+        run: if [ -z "${{env.customPackageName}}" ]; then echo "name=${{github.action_repository}}-${{steps.iver.outputs.version}}.jar" >> $GITHUB_OUTPUT; else echo "name=${{env.customPackageName}}" >> $GITHUB_OUTPUT; fi
       - id: get-cache
         name: Get JAR Cache
         uses: actions/cache/restore@v4
         with:
-          path: target/*
-          key: jarpack-${{steps.identify.outputs.version}}
+          path: |
+            target/${{steps.ipkg.outputs.name}}
+            target/favicon.*
           enableCrossOsArchive: true
       - name: Checkout
         if: steps.get-cache.outputs.cache-hit != 'true'
@@ -60,15 +60,15 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: |
-            target/${{env.packageName}}
+            target/${{steps.ipkg.outputs.name}}
             target/favicon.*
-          key: jarpack-${{steps.identify.outputs.version}}
+          key: jarpack-${{steps.iver.outputs.version}}
           enableCrossOsArchive: true
       - name: Upload Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
-          files: "target/${{env.packageName}}"
+          files: "target/${{steps.ipkg.outputs.name}}"
   pack-deb-linux:
     needs: [build]
     if: true
@@ -101,7 +101,7 @@ jobs:
           java-version: ${{env.javaVersion}}
           java-package: jdk+fx
       - name: Prepare Files
-        run: mkdir app && cp "target/${{env.packageName}}" app/main.jar
+        run: mkdir app && cp "target/${{needs.build.outputs.packageName}}" app/main.jar
       - name: Run jpackage
         run: >
           ${{env.JAVA_HOME}}/bin/jpackage
@@ -141,7 +141,7 @@ jobs:
         id: get-cache
         uses: actions/cache/restore@v4
         with:
-          path: target/${{env.packageName}}
+          path: target/${{needs.build.outputs.packageName}}
           key: jarpack-${{needs.build.outputs.version}}
           enableCrossOsArchive: true
       - name: Install Java JRE
@@ -161,7 +161,7 @@ jobs:
           java-version: ${{env.javaVersion}}
           java-package: jdk+fx
       - name: Copy Files
-        run: mkdir app && copy "target/${{env.packageName}}" app/main.jar
+        run: mkdir app && copy "target/${{needs.build.outputs.packageName}}" app/main.jar
       - name: Run jpackage
         run: >
           ${{env.JAVA_HOME}}\bin\jpackage.exe
@@ -197,7 +197,7 @@ jobs:
         id: get-cache
         uses: actions/cache/restore@v4
         with:
-          path: target/${{env.packageName}}
+          path: target/${{needs.build.outputs.packageName}}
           key: jarpack-${{needs.build.outputs.version}}
           enableCrossOsArchive: true
       - name: Install Java JRE
@@ -216,7 +216,7 @@ jobs:
           java-version: ${{env.javaVersion}}
           java-package: jdk+fx
       - name: Copy Files
-        run: mkdir app && cp "target/${{env.packageName}}" app/main.jar
+        run: mkdir app && cp "target/${{needs.build.outputs.packageName}}" app/main.jar
       - name: Run jpackage
         shell: bash
         run: >
@@ -250,7 +250,7 @@ jobs:
         id: get-cache
         uses: actions/cache/restore@v4
         with:
-          path: target/${{env.packageName}}
+          path: target/${{needs.build.outputs.packageName}}
           key: jarpack-${{needs.build.outputs.version}}
           enableCrossOsArchive: true
       - name: Install Java JRE
@@ -269,7 +269,7 @@ jobs:
           java-version: ${{env.javaVersion}}
           java-package: jdk+fx
       - name: Copy Files
-        run: mkdir app && cp "target/${{env.packageName}}" app/main.jar
+        run: mkdir app && cp "target/${{needs.build.outputs.packageName}}" app/main.jar
       - name: Run jpackage
         shell: bash
         run: >
