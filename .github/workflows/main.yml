@@ -144,7 +144,9 @@ jobs:
         id: get-cache
         uses: actions/cache/restore@v4
         with:
-          path: target/${{needs.build.outputs.packageName}}
+          path: |
+            target/${{needs.build.outputs.packageName}}
+            target/favicon.*
           key: jarpack-${{needs.build.outputs.version}}
           enableCrossOsArchive: true
       - name: Install Java JRE
@@ -200,7 +202,9 @@ jobs:
         id: get-cache
         uses: actions/cache/restore@v4
         with:
-          path: target/${{needs.build.outputs.packageName}}
+          path: |
+            target/${{needs.build.outputs.packageName}}
+            target/favicon.*
           key: jarpack-${{needs.build.outputs.version}}
           enableCrossOsArchive: true
       - name: Install Java JRE
@@ -253,7 +257,9 @@ jobs:
         id: get-cache
         uses: actions/cache/restore@v4
         with:
-          path: target/${{needs.build.outputs.packageName}}
+          path: |
+            target/${{needs.build.outputs.packageName}}
+            target/favicon.*
           key: jarpack-${{needs.build.outputs.version}}
           enableCrossOsArchive: true
       - name: Install Java JRE
