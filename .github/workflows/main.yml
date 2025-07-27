@@ -173,6 +173,7 @@ jobs:
           --name "${{env.appName}}"
           --type msi
           --input "${{env.appDir}}"
+          --icon "target\\favicon.png"
           --runtime-image "${{steps.jre-clone.outputs.path}}"
           --main-jar main.jar
           --app-version "${{needs.build.outputs.version}}"
@@ -230,6 +231,7 @@ jobs:
           ${{env.JAVA_HOME}}/bin/jpackage
           --name "${{env.appName}}"
           --type dmg
+          --icon "target/favicon.icns"
           --input "${{env.appDir}}"
           --main-jar main.jar
           --runtime-image "${{steps.jre-clone.outputs.path}}"
@@ -286,6 +288,7 @@ jobs:
           --name "${{env.appName}}"
           --type dmg
           --input "${{env.appDir}}"
+          --icon "target/favicon.icns"
           --main-jar main.jar
           --runtime-image "${{steps.jre-clone.outputs.path}}"
           --app-version "${{needs.build.outputs.version}}"
