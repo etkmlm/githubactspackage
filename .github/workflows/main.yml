@@ -11,7 +11,7 @@ env:
   appDir: app
   linuxCategory: Game
   linuxPackageName: test-hello
-  version: 1.1.91
+  #version: 1.1.91
   vendor: etkmlm
   javaVersion: 17
   javaSource: zulu
@@ -22,7 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
+      - name: Identify Version
+        run: tag="${{github.ref_name}}" && echo "version=${tag:1}" >> $GITHUB_ENV
       - id: get-cache
+        name: Get JAR Cache
         uses: actions/cache/restore@v4
         with:
           path: target/${{env.packageName}}
