@@ -31,7 +31,7 @@ jobs:
         run: tag="${{github.ref_name}}" && echo "version=${tag:1}" >> $GITHUB_OUTPUT
       - name: Identify Package Name
         id: ipkg
-        run: if [ -z "${{env.customPackageName}}" ]; then echo "name=${{github.action_repository}}-${{steps.iver.outputs.version}}.jar" >> $GITHUB_OUTPUT; else echo "name=${{env.customPackageName}}" >> $GITHUB_OUTPUT; fi
+        run: if [ -z "${{env.customPackageName}}" ]; then echo "name=${{github.event.repository.name}}-${{steps.iver.outputs.version}}.jar" >> $GITHUB_OUTPUT; else echo "name=${{env.customPackageName}}" >> $GITHUB_OUTPUT; fi
       - id: get-cache
         name: Get JAR Cache
         uses: actions/cache/restore@v4
@@ -39,6 +39,7 @@ jobs:
           path: |
             target/${{steps.ipkg.outputs.name}}
             target/favicon.*
+          key: jarpack-${{steps.iver.outputs.version}}
           enableCrossOsArchive: true
       - name: Checkout
         if: steps.get-cache.outputs.cache-hit != 'true'
@@ -82,7 +83,9 @@ jobs:
         id: get-cache
         uses: actions/cache/restore@v4
         with:
-          path: target/*
+          path: |
+            target/${{needs.build.outputs.packageName}}
+            target/favicon.*
           key: jarpack-${{needs.build.outputs.version}}
           enableCrossOsArchive: true
       - name: Install Java JRE
@@ -141,7 +144,9 @@ jobs:
         id: get-cache
         uses: actions/cache/restore@v4
         with:
-          path: target/${{needs.build.outputs.packageName}}
+          path: |
+            target/${{needs.build.outputs.packageName}}
+            target/favicon.*
           key: jarpack-${{needs.build.outputs.version}}
           enableCrossOsArchive: true
       - name: Install Java JRE
@@ -197,7 +202,9 @@ jobs:
         id: get-cache
         uses: actions/cache/restore@v4
         with:
-          path: target/${{needs.build.outputs.packageName}}
+          path: |
+            target/${{needs.build.outputs.packageName}}
+            target/favicon.*
           key: jarpack-${{needs.build.outputs.version}}
           enableCrossOsArchive: true
       - name: Install Java JRE
@@ -250,7 +257,9 @@ jobs:
         id: get-cache
         uses: actions/cache/restore@v4
         with:
-          path: target/${{needs.build.outputs.packageName}}
+          path: |
+            target/${{needs.build.outputs.packageName}}
+            target/favicon.*
           key: jarpack-${{needs.build.outputs.version}}
           enableCrossOsArchive: true
       - name: Install Java JRE
