@@ -1,10 +1,8 @@
 name: Build and Package
 
 on:
-  push:
-    tags: [ v* ]
-
-# Only trigger when a commit is pushed with tag starts with v.
+  release:
+    types: [published]
 
 env:
   #customPackageName: githubactspackage-1.0-SNAPSHOT.jar
@@ -12,6 +10,7 @@ env:
   appDir: app
   linuxCategory: Game
   linuxPackageName: test-hello
+  #linuxDependencies: libc6, libgcc-s1, libstdc++6, xdg-utils
   vendor: etkmlm
   javaVersion: 17
   javaSource: zulu
@@ -22,13 +21,14 @@ jobs:
     name: Process Project JAR File
     runs-on: ubuntu-latest
     permissions: write-all
+    if: startsWith(github.event.release.tag_name, 'v')
     outputs:
       version: ${{ steps.iver.outputs.version }}
       packageName: ${{ steps.ipkg.outputs.name }}
     steps:
       - name: Identify Version
         id: iver
-        run: tag="${{github.ref_name}}" && echo "version=${tag:1}" >> $GITHUB_OUTPUT
+        run: tag="${{github.event.release.tag_name}}" && echo "version=${tag:1}" >> $GITHUB_OUTPUT
       - name: Identify Package Name
         id: ipkg
         run: if [ -z "${{env.customPackageName}}" ]; then echo "name=${{github.event.repository.name}}-${{steps.iver.outputs.version}}.jar" >> $GITHUB_OUTPUT; else echo "name=${{env.customPackageName}}" >> $GITHUB_OUTPUT; fi
@@ -70,7 +70,7 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           files: "target/${{steps.ipkg.outputs.name}}"
-  pack-deb-linux:
+  pack-linux:
     needs: [build]
     if: true
     name: Pack JAR For Linux
@@ -118,8 +118,14 @@ jobs:
           --vendor "$vendor"
           --java-options "'-Duser.dir=\$APPDIR'"
           --linux-menu-group "${{env.linuxCategory}}"
-      - name: Get JAR Name
+      - name: Get Pack Name
         run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
+      - name: Modify Dependencies
+        run: |
+          dpkg-deb -R "$ORG_FILE" temp && 
+          awk '/^Depends:/ { print "Depends: ${{env.linuxDependencies}}"; next }1' temp/DEBIAN/control > tempcon && 
+          mv tempcon temp/DEBIAN/control && 
+          dpkg-deb -b temp "$ORG_FILE"
       - name: Rename File
         run: tempfile="$ORG_FILE" && file="${tempfile%.*}-linux.deb" && echo "FILE=$file" >> $GITHUB_ENV && mv "$tempfile" "$file"
       - name: Upload Release
@@ -127,7 +133,7 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           files: "${{env.FILE}}"
-  pack-exe-windows:
+  pack-windows:
     needs: [build]
     if: true
     name: Pack JAR For Windows
@@ -173,7 +179,7 @@ jobs:
           --name "${{env.appName}}"
           --type msi
           --input "${{env.appDir}}"
-          --icon "target\\favicon.png"
+          --icon "target\\favicon.ico"
           --runtime-image "${{steps.jre-clone.outputs.path}}"
           --main-jar main.jar
           --app-version "${{needs.build.outputs.version}}"
@@ -181,7 +187,7 @@ jobs:
           --java-options "'-Duser.dir=`$APPDIR'"
           --win-dir-chooser
           --win-menu --win-menu-group "${{env.appName}}"
-      - name: Get JAR Name
+      - name: Get Pack Name
         shell: bash
         run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
       - name: Rename File
@@ -192,7 +198,7 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           files: "${{env.FILE}}"
-  pack-dmg-macos-old:
+  pack-macos-old:
     needs: [build]
     if: true
     name: Pack JAR For MacOS Non Apple Silicon
@@ -239,7 +245,7 @@ jobs:
           --vendor "${{env.vendor}}"
           --java-options "'-Duser.dir=\$APPDIR'"
           --mac-package-name "${{env.appName}}"
-      - name: Get JAR Name
+      - name: Get Pack Name
         run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
       - name: Rename File
         run: tempfile="$ORG_FILE" && file="${tempfile%.*}-macos.dmg" && echo "FILE=$file" >> $GITHUB_ENV && mv "$tempfile" "$file"
@@ -248,7 +254,7 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           files: "${{env.FILE}}"    
-  pack-dmg-macos:
+  pack-macos:
     needs: [build]
     if: true
     name: Pack JAR For MacOS Apple Silicon
@@ -295,7 +301,7 @@ jobs:
           --vendor "${{env.vendor}}"
           --java-options "'-Duser.dir=\$APPDIR'"
           --mac-package-name "${{env.appName}}"
-      - name: Get JAR Name
+      - name: Get Pack Name
         run: echo "ORG_FILE=$( ls -Art | tail -n 1 )" >> $GITHUB_ENV
       - name: Rename File
         run: tempfile="$ORG_FILE" && file="${tempfile%.*}-macos-arm.dmg" && echo "FILE=$file" >> $GITHUB_ENV && mv "$tempfile" "$file"
@@ -304,4 +310,16 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           files: "${{env.FILE}}"
-  
+  clear-caches:
+    needs: [build, pack-linux, pack-windows, pack-macos-old, pack-macos]
+    if: true
+    name: Clear Project Caches
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - run: gh cache delete jarpack-${{needs.build.outputs.version}} --repo ${{github.repository}}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
