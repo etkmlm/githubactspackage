@@ -129,7 +129,7 @@ jobs:
           files: "${{env.FILE}}"
   pack-exe-windows:
     needs: [build]
-    if: false
+    if: true
     name: Pack JAR For Windows
     runs-on: windows-latest
     permissions: write-all
@@ -173,6 +173,7 @@ jobs:
           --name "${{env.appName}}"
           --type msi
           --input "${{env.appDir}}"
+          --icon "target\\favicon.png"
           --runtime-image "${{steps.jre-clone.outputs.path}}"
           --main-jar main.jar
           --app-version "${{needs.build.outputs.version}}"
@@ -193,7 +194,7 @@ jobs:
           files: "${{env.FILE}}"
   pack-dmg-macos-old:
     needs: [build]
-    if: false
+    if: true
     name: Pack JAR For MacOS Non Apple Silicon
     runs-on: macos-13
     permissions: write-all
@@ -230,6 +231,7 @@ jobs:
           ${{env.JAVA_HOME}}/bin/jpackage
           --name "${{env.appName}}"
           --type dmg
+          --icon "target/favicon.icns"
           --input "${{env.appDir}}"
           --main-jar main.jar
           --runtime-image "${{steps.jre-clone.outputs.path}}"
@@ -248,7 +250,7 @@ jobs:
           files: "${{env.FILE}}"    
   pack-dmg-macos:
     needs: [build]
-    if: false
+    if: true
     name: Pack JAR For MacOS Apple Silicon
     runs-on: macos-latest
     permissions: write-all
@@ -286,6 +288,7 @@ jobs:
           --name "${{env.appName}}"
           --type dmg
           --input "${{env.appDir}}"
+          --icon "target/favicon.icns"
           --main-jar main.jar
           --runtime-image "${{steps.jre-clone.outputs.path}}"
           --app-version "${{needs.build.outputs.version}}"
