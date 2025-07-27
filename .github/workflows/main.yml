@@ -3,6 +3,7 @@ name: Build and Package
 on:
   push:
     tags: [ v* ]
+
 # Only trigger when a commit is pushed with tag starts with v.
 
 env:
@@ -15,6 +16,11 @@ env:
   vendor: etkmlm
   javaVersion: 17
   javaSource: zulu
+  icon: actions/resources/favicon
+  buildLinux: true
+  buildWindows: false
+  buildMacos: false
+  buildMacosArm: false
 
 jobs:
   build:
@@ -31,7 +37,7 @@ jobs:
         name: Get JAR Cache
         uses: actions/cache/restore@v4
         with:
-          path: target/${{env.packageName}}
+          path: target/*
           key: jarpack-${{steps.identify.outputs.version}}
           enableCrossOsArchive: true
       - name: Checkout
@@ -47,13 +53,15 @@ jobs:
           cache: 'maven'
       - name: Build
         if: steps.get-cache.outputs.cache-hit != 'true'
-        run: mvn clean package shade:shade
+        run: mvn clean package shade:shade && mv "${{env.icon}}".* "target"
       - name: Cache JAR
         id: cache
         if: always() && steps.get-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
-          path: target/${{env.packageName}}
+          path: |
+            target/${{env.packageName}}
+            target/favicon.*
           key: jarpack-${{steps.identify.outputs.version}}
           enableCrossOsArchive: true
       - name: Upload Release
@@ -63,6 +71,7 @@ jobs:
           files: "target/${{env.packageName}}"
   pack-deb-linux:
     needs: [build]
+    if: ${{env.buildLinux}} == 'true'
     name: Pack JAR For Linux
     runs-on: ubuntu-latest
     permissions: write-all
@@ -73,7 +82,7 @@ jobs:
         id: get-cache
         uses: actions/cache/restore@v4
         with:
-          path: target/${{env.packageName}}
+          path: target/*
           key: jarpack-${{needs.build.outputs.version}}
           enableCrossOsArchive: true
       - name: Install Java JRE
@@ -100,6 +109,7 @@ jobs:
           --type deb
           --input "${{env.appDir}}"
           --main-jar main.jar
+          --icon "target/favicon.png"
           --runtime-image "${{steps.jre-clone.outputs.path}}"
           --app-version "${{needs.build.outputs.version}}"
           --vendor "$vendor"
@@ -116,6 +126,7 @@ jobs:
           files: "${{env.FILE}}"
   pack-exe-windows:
     needs: [build]
+    if: ${{env.buildWindows}} == 'true'
     name: Pack JAR For Windows
     runs-on: windows-latest
     permissions: write-all
@@ -177,6 +188,7 @@ jobs:
           files: "${{env.FILE}}"
   pack-dmg-macos-old:
     needs: [build]
+    if: ${{env.buildMacos}} == 'true'
     name: Pack JAR For MacOS Non Apple Silicon
     runs-on: macos-13
     permissions: write-all
@@ -229,6 +241,7 @@ jobs:
           files: "${{env.FILE}}"    
   pack-dmg-macos:
     needs: [build]
+    if: ${{env.buildMacosArm}} == 'true'
     name: Pack JAR For MacOS Apple Silicon
     runs-on: macos-latest
     permissions: write-all
